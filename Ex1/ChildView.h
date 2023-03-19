@@ -24,8 +24,16 @@ public:
 	protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
+// Элементы
+public:
+	CButton btnDraw,
+			btnErase;
+	
+
 // Реализация
 public:
+	bool isImageDrawing = false;
+
 	COLORREF color = RGB(0, 255, 0);
 
 	void fText(CPaintDC& dc, LPCTSTR text, int x, int y);
@@ -35,6 +43,7 @@ public:
 
 	// Созданные функции схемы сообщений
 protected:
+	afx_msg void OnBtnDrawClick();
 	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 };

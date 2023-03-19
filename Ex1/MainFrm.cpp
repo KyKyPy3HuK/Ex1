@@ -44,6 +44,18 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Не удалось создать окно представлений\n");
 		return -1;
 	}
+
+	//TODO
+
+	m_wndView.btnDraw.Create(_T("Draw"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(300, 10, 400, 30), &m_wndView, IDB_BTN_DRAW);
+
+
+
+
+
+
+
+
 	return 0;
 }
 

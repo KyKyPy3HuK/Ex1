@@ -5,6 +5,9 @@
 #define IDD_ABOUTBOX                    100
 #define IDP_OLE_INIT_FAILED             100
 #define IDS_STRING101                   101
+#define IDB_BTN_DRAW                    102
+#define IDB_BTNERASE                    103
+#define IDB_BTN_ERASE                   103
 #define IDR_MAINFRAME                   128
 #define IDR_Ex1TYPE                     130
 
