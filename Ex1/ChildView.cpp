@@ -120,7 +120,6 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
 	if (c_bitmap.GetSafeHandle() != NULL && isImageDrawing)
 	{
-		Invalidate();
 		return true;
 	}
 	return CWnd::OnEraseBkgnd(pDC);
