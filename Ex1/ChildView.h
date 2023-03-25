@@ -1,11 +1,6 @@
 ﻿
 // ChildView.h: интерфейс класса CChildView
-//
-
-
 #pragma once
-
-
 // Окно CChildView
 
 class CChildView : public CWnd
@@ -29,17 +24,25 @@ public:
 	CButton btnDraw,
 			btnErase;
 	
+// Переменные
+protected:
+
+	CFile* pictureFile;
+	CBitmap c_bitmap;
+
+	BITMAPFILEHEADER bmHeader;
+	BITMAPINFOHEADER bmInfo;
+	char* bitmap;
+
+	bool isImageDrawing = false;
+
+	COLORREF color = RGB(0, 255, 0);
 
 // Реализация
 public:
-	bool isImageDrawing = false;
-
-	CBitmap bitMap;
-	
-	COLORREF color = RGB(0, 255, 0);
 
 	void fText(CPaintDC& dc, LPCTSTR text, int x, int y);
-	void drawPicture(CPaintDC& dc, int* bitMap, int width, int heigth, int x, int y);
+	void drawPicture(CDC& dc, int* bitMap, int width, int heigth, int x, int y);
 	BOOL SetBitmap(UINT nIDResourse);
 	virtual ~CChildView();
 
