@@ -95,7 +95,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

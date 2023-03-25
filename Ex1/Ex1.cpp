@@ -9,11 +9,16 @@
 #include "Ex1.h"
 #include "MainFrm.h"
 #include <string.h>
-
+#include <iostream>
+#include "stdio.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
+#ifdef _UNICODE
+#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
+#else
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#endif
 
 // CEx1App
 

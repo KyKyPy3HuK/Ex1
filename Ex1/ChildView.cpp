@@ -8,10 +8,15 @@
 #include "ChildView.h"
 #include <string>
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+#define COLORS_COUNT 3
+#define RED 2
+#define GREEN 1
+#define BLUE 0
 
 // CChildView
 
@@ -36,30 +41,21 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 }
 
 
-void CChildView::drawPicture(CDC& dc, int* bitMap, int width, int heigth, int x, int y) {
-
-
-	for (int i = 0; i < heigth; i++)
+void CChildView::drawPicture(CDC& dc, BYTE** bitmap, int width, int heigth, int x, int y) {
+	for (int i = 0; i < heigth * width; i++)
 	{
-		for (int j = 0; j < width; j++)
-		{
-			if (bitMap[i+ (heigth*j)] == 1)
-			{
-				dc.SetPixel(i + x, j + y, RGB(0, 0, 0));
-			}
-			else {
-				dc.SetPixel(i + x, j + y, RGB(255, 0, 0));
-			}
-		}
+		int row =i % width;
+		int column =  heigth - i / width;
+		dc.SetPixel(row + x, column + y, RGB(bitmap[i][RED], bitmap[i][GREEN], bitmap[i][BLUE]));
 	}
 }
 // Обработчики сообщений CChildView
 
 BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
 {
+	
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
-
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
@@ -68,9 +64,38 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
 	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
 	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
-	void* bmBits = new char[bmInfo.biSizeImage];
-	pictureFile->Read(bmBits, sizeof(bmBits));
-	c_bitmap.CreateBitmap(bmInfo.biWidth, bmInfo.biHeight, bmInfo.biPlanes, bmInfo.biBitCount, bmBits);
+
+	BYTE** bitmap = new BYTE * [bmInfo.biWidth * bmInfo.biHeight];
+
+	for (unsigned int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
+	{
+		bitmap[i] = new BYTE[COLORS_COUNT];
+	}
+
+	BYTE readByte;
+
+	for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
+	{
+		pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
+		bitmap[i][BLUE] = readByte;
+		pictureFile->Read(&readByte, sizeof(BYTE)); //read GREEN
+		bitmap[i][GREEN] = readByte;
+		pictureFile->Read(&readByte, sizeof(BYTE)); //read RED
+		bitmap[i][RED] = readByte;
+	}
+	mbitmap = bitmap;
+
+
+	//c_bitmap.CreateBitmap(bmInfo.biWidth, bmInfo.biHeight, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
+	//for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight * 3; i++)
+	//{
+	//		std::printf("%d", bitmap[i][RED]);
+	//		std::printf("%c", '\t');
+	//		std::printf("%d", bitmap[i][GREEN]);
+	//		std::printf("%c", '\t');
+	//		std::printf("%d", bitmap[i][BLUE]);
+	//		std::printf("%c", '\n');
+	//}
 	return TRUE;
 }
 
@@ -89,8 +114,9 @@ void CChildView::OnPaint()
 	LPCTSTR lpsBiBitCount = str3.c_str();
 	std::wstring str4 = std::to_wstring(bmInfo.biSizeImage);
 	LPCTSTR lpsBiSizeImage = str4.c_str();
-	if( bitmap != NULL && isImageDrawing){ 
+	if(isImageDrawing){ // bitmap != NULL && 
 		fText(dc, _T("sas"), 10, 10);
+		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
 	}
 	else
 	{
