@@ -42,9 +42,9 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 
 
 void CChildView::drawPicture(CDC& dc, BYTE** bitmap, int width, int heigth, int x, int y) {
-	for (int i = 0; i < heigth * width; i++)
+	for (int i = 0; i < heigth * width; ++i)
 	{
-		int row =i % width;
+		int row = i % width;
 		int column =  heigth - i / width;
 		dc.SetPixel(row + x, column + y, RGB(bitmap[i][RED], bitmap[i][GREEN], bitmap[i][BLUE]));
 	}
@@ -85,17 +85,7 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	}
 	mbitmap = bitmap;
 
-
 	//c_bitmap.CreateBitmap(bmInfo.biWidth, bmInfo.biHeight, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
-	//for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight * 3; i++)
-	//{
-	//		std::printf("%d", bitmap[i][RED]);
-	//		std::printf("%c", '\t');
-	//		std::printf("%d", bitmap[i][GREEN]);
-	//		std::printf("%c", '\t');
-	//		std::printf("%d", bitmap[i][BLUE]);
-	//		std::printf("%c", '\n');
-	//}
 	return TRUE;
 }
 
@@ -108,12 +98,7 @@ void CChildView::OnPaint()
 	LPCTSTR lpsBiWidth = str.c_str();
 	std::wstring str1 = std::to_wstring(bmInfo.biHeight);
 	LPCTSTR lpsBiHeight = str1.c_str();
-	std::wstring str2 = std::to_wstring(bmInfo.biSize);
-	LPCTSTR lpsBiSize = str2.c_str();
-	std::wstring str3 = std::to_wstring(bmInfo.biBitCount);
-	LPCTSTR lpsBiBitCount = str3.c_str();
-	std::wstring str4 = std::to_wstring(bmInfo.biSizeImage);
-	LPCTSTR lpsBiSizeImage = str4.c_str();
+
 	if(isImageDrawing){ // bitmap != NULL && 
 		fText(dc, _T("sas"), 10, 10);
 		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
@@ -122,9 +107,7 @@ void CChildView::OnPaint()
 	{
 		fText(dc, lpsBiWidth, 10, 10);
 		fText(dc, lpsBiHeight, 10, 30);
-		fText(dc, lpsBiSize, 10, 50);
-		fText(dc, lpsBiBitCount, 10, 70);
-		fText(dc, lpsBiSizeImage, 10, 90);
+
 	}
 	
 	
@@ -144,7 +127,7 @@ void  CChildView::OnBtnDrawClick() {
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
-	if (c_bitmap.GetSafeHandle() != NULL && isImageDrawing)
+	if (isImageDrawing)//c_bitmap.GetSafeHandle() != NULL && 
 	{
 		return true;
 	}
