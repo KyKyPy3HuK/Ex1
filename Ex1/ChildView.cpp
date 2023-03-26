@@ -41,12 +41,12 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 }
 
 
-void CChildView::drawPicture(CDC& dc, BYTE** bitmap, int width, int heigth, int x, int y) {
-	for (int i = 0; i < heigth * width; ++i)
+void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
+	for (int i = 0; i < heigth * width * COLORS_COUNT; i += 3)
 	{
-		int row = i % width;
-		int column =  heigth - i / width;
-		dc.SetPixel(row + x, column + y, RGB(bitmap[i][RED], bitmap[i][GREEN], bitmap[i][BLUE]));
+		int row = (i / 3) % width;
+		int column = heigth - (i / 3) / width;
+		dc.SetPixel(row + x, column + y, RGB(bitmap[i], bitmap[i + 1], bitmap[i+2]));
 	}
 }
 // Обработчики сообщений CChildView
@@ -60,23 +60,28 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), LoadIcon(NULL,IDI_APPLICATION));
-	SetBitmap(IDB_BITMAP2);
-	//pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
-	//pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
-	//pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
-	//
-	//BYTE* bitmap = new BYTE [bmInfo.biSizeImage];
-	//BYTE readByte;
-	//
-	//for (int i = 0; i < bmInfo.biSizeImage; i++)
-	//{
-	//	pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
-	//	bitmap[i] = readByte;
-	//}
-	//mbitmap = bitmap;
-	//
-	//c_bitmap.CreateBitmap(bmInfo.biWidth, bmInfo.biHeight, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
+	
 
+
+
+
+
+	pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
+	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
+	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+	
+	LPBYTE bitmap = new BYTE [bmInfo.biSizeImage];
+	BYTE readByte;
+	
+	for (int i = 0; i < bmInfo.biSizeImage; i++)
+	{
+		pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
+		bitmap[i] = readByte;
+	}
+
+	c_bitmap.CreateBitmap(1024,628, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
+	c_bitmap.LoadBitmapW(IDB_BITMAP2);
+	mbitmap = bitmap;
 	return TRUE;
 }
 
@@ -90,8 +95,8 @@ void CChildView::OnPaint()
 	std::wstring str1 = std::to_wstring(bmInfo.biHeight);
 	LPCTSTR lpsBiHeight = str1.c_str();
 
-	if(isImageDrawing && c_bitmap.GetSafeHandle() != NULL){ // bitmap != NULL && 
-		fText(dc, _T("sas"), 10, 10);
+	if(isImageDrawing && c_bitmap.GetSafeHandle() != NULL){ // bitmap != NULL 
+		
 		CDC memDC;
 		if (!memDC.CreateCompatibleDC(&dc))
 		{
@@ -100,10 +105,12 @@ void CChildView::OnPaint()
 		BITMAP bm;
 
 		c_bitmap.GetBitmap(&bm);
+
+		printf("%d", bm.bmBits);
 		CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
 		dc.StretchBlt(50, 50, bm.bmWidth, bm.bmHeight, &memDC, 0, 0, bm.bmWidth, bm.bmHeight,SRCCOPY);
 		memDC.SelectObject(pOldBitmap);
-		//drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
+		//drawPicture(memDC, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
 	}
 	else
 	{
