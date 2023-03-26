@@ -46,7 +46,7 @@ void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x
 	{
 		int row = (i/3) % width;
 		int column =  heigth - (i/3) / width;
-		dc.SetPixel(row + x, column + y, RGB(bitmap[i], bitmap[i+1], bitmap[i+2]));
+		dc.SetPixelV(row + x, column + y, RGB(bitmap[i+2], bitmap[i+1], bitmap[i]));
 	}
 }
 // Обработчики сообщений CChildView
