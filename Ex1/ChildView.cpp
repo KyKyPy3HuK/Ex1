@@ -41,12 +41,12 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 }
 
 
-void CChildView::drawPicture(CDC& dc, BYTE** bitmap, int width, int heigth, int x, int y) {
-	for (int i = 0; i < heigth * width; ++i)
+void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
+	for (int i = 0; i < heigth * width * COLORS_COUNT; i+=3)
 	{
-		int row = i % width;
-		int column =  heigth - i / width;
-		dc.SetPixel(row + x, column + y, RGB(bitmap[i][RED], bitmap[i][GREEN], bitmap[i][BLUE]));
+		int row = (i/3) % width;
+		int column =  heigth - (i/3) / width;
+		dc.SetPixel(row + x, column + y, RGB(bitmap[i], bitmap[i+1], bitmap[i+2]));
 	}
 }
 // Обработчики сообщений CChildView
@@ -65,23 +65,13 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
 	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 
-	BYTE** bitmap = new BYTE * [bmInfo.biWidth * bmInfo.biHeight];
-
-	for (unsigned int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
-	{
-		bitmap[i] = new BYTE[COLORS_COUNT];
-	}
-
+	BYTE* bitmap = new BYTE[bmInfo.biWidth * bmInfo.biHeight * COLORS_COUNT];
 	BYTE readByte;
 
-	for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
+	for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight * COLORS_COUNT; i++)
 	{
 		pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
-		bitmap[i][BLUE] = readByte;
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read GREEN
-		bitmap[i][GREEN] = readByte;
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read RED
-		bitmap[i][RED] = readByte;
+		bitmap[i] = readByte;
 	}
 	mbitmap = bitmap;
 

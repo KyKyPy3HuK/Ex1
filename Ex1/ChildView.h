@@ -29,7 +29,7 @@ protected:
 
 	CFile* pictureFile;
 	CBitmap c_bitmap;
-	BYTE** mbitmap;
+	BYTE* mbitmap;
 	BITMAPFILEHEADER bmHeader;
 	BITMAPINFOHEADER bmInfo;
 
@@ -41,7 +41,7 @@ protected:
 public:
 
 	void fText(CPaintDC& dc, LPCTSTR text, int x, int y);
-	void drawPicture(CDC& dc, BYTE** bitMap, int width, int heigth, int x, int y);
+	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	BOOL SetBitmap(UINT nIDResourse);
 	virtual ~CChildView();
 
