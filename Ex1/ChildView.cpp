@@ -60,32 +60,23 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), LoadIcon(NULL,IDI_APPLICATION));
-
-	pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
-	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
-	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
-
-	BYTE** bitmap = new BYTE * [bmInfo.biWidth * bmInfo.biHeight];
-
-	for (unsigned int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
-	{
-		bitmap[i] = new BYTE[COLORS_COUNT];
-	}
-
-	BYTE readByte;
-
-	for (int i = 0; i < bmInfo.biWidth * bmInfo.biHeight; i++)
-	{
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
-		bitmap[i][BLUE] = readByte;
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read GREEN
-		bitmap[i][GREEN] = readByte;
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read RED
-		bitmap[i][RED] = readByte;
-	}
-	mbitmap = bitmap;
-
+	SetBitmap(IDB_BITMAP2);
+	//pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
+	//pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
+	//pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+	//
+	//BYTE* bitmap = new BYTE [bmInfo.biSizeImage];
+	//BYTE readByte;
+	//
+	//for (int i = 0; i < bmInfo.biSizeImage; i++)
+	//{
+	//	pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
+	//	bitmap[i] = readByte;
+	//}
+	//mbitmap = bitmap;
+	//
 	//c_bitmap.CreateBitmap(bmInfo.biWidth, bmInfo.biHeight, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
+
 	return TRUE;
 }
 
@@ -99,9 +90,20 @@ void CChildView::OnPaint()
 	std::wstring str1 = std::to_wstring(bmInfo.biHeight);
 	LPCTSTR lpsBiHeight = str1.c_str();
 
-	if(isImageDrawing){ // bitmap != NULL && 
+	if(isImageDrawing && c_bitmap.GetSafeHandle() != NULL){ // bitmap != NULL && 
 		fText(dc, _T("sas"), 10, 10);
-		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
+		CDC memDC;
+		if (!memDC.CreateCompatibleDC(&dc))
+		{
+			return;
+		}
+		BITMAP bm;
+
+		c_bitmap.GetBitmap(&bm);
+		CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
+		dc.StretchBlt(50, 50, bm.bmWidth, bm.bmHeight, &memDC, 0, 0, bm.bmWidth, bm.bmHeight,SRCCOPY);
+		memDC.SelectObject(pOldBitmap);
+		//drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
 	}
 	else
 	{
@@ -127,7 +129,7 @@ void  CChildView::OnBtnDrawClick() {
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
-	if (isImageDrawing)//c_bitmap.GetSafeHandle() != NULL && 
+	if (isImageDrawing && c_bitmap.GetSafeHandle() != NULL)//c_bitmap.GetSafeHandle() != NULL && 
 	{
 		return true;
 	}

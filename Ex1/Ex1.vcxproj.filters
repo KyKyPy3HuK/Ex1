@@ -65,5 +65,14 @@
     <Image Include="res\Ex1.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="YuiUSSR.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="res\YuiUSSR.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

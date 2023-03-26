@@ -29,7 +29,7 @@ protected:
 
 	CFile* pictureFile;
 	CBitmap c_bitmap;
-	BYTE** mbitmap;
+	BYTE* mbitmap;
 	BITMAPFILEHEADER bmHeader;
 	BITMAPINFOHEADER bmInfo;
 

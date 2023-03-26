@@ -209,7 +209,10 @@
     <None Include="res\Ex1.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bitmap1.bmp" />
     <Image Include="res\Ex1.ico" />
+    <Image Include="res\YuiUSSR.bmp" />
+    <Image Include="YuiUSSR.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
