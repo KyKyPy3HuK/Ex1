@@ -31,6 +31,7 @@ CChildView::~CChildView()
 BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_PAINT()
 	ON_BN_CLICKED(IDB_BTN_DRAW, OnBtnDrawClick)
+	ON_BN_CLICKED(IDB_BTN_DRAWBLT, OnBtnDrawBltClick)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
@@ -42,11 +43,11 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
 	UINT widthInBytes = width * BYTES_PER_PIXEL;
-	UINT offset = (4 - (widthInBytes % 4)) % 4; //(((width * BYTES_PER_PIXEL) + 3) & ~3) - width * BYTES_PER_PIXEL;
+	UINT offset = (4 - (widthInBytes % 4)) % 4; 
 	UINT fullWidth = widthInBytes + offset;
-	for (int i = 0; i < heigth; i++)
+	for (int i = 0; i < heigth; ++i)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 0; j < width; ++j)
 		{
 			UINT column = j;
 			UINT row = heigth - i;
@@ -73,15 +74,13 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 	
 	LPBYTE bitmap = new BYTE [bmInfo.biSizeImage];
-	LPBYTE readByte = new BYTE[bmInfo.biSizeImage];
+	LPBYTE readByte = new BYTE [bmInfo.biSizeImage];
 	
-
 	pictureFile->Read(readByte, sizeof(BYTE) * bmInfo.biSizeImage); //read BLUE
 	bitmap = readByte;
-			
-	mbitmap = bitmap;
-	c_bitmap.CreateBitmap(1024,628, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
-	c_bitmap.LoadBitmapW(IDB_BITMAP2);
+	mbitmap = readByte;
+	
+	c_bitmap.LoadBitmapW(IDB_BITMAP_MOUSE);
 	
 	return TRUE;
 }
@@ -96,30 +95,31 @@ void CChildView::OnPaint()
 	std::wstring str1 = std::to_wstring(bmInfo.biHeight);
 	LPCTSTR lpsBiHeight = str1.c_str();
 
-	if(isImageDrawing && c_bitmap.GetSafeHandle() != NULL){ // bitmap != NULL 
-		
-		//CDC memDC;
-		//if (!memDC.CreateCompatibleDC(&dc))
-		//{
-		//	return;
-		//}
-		//BITMAP bm;
-		//
-		//c_bitmap.GetBitmap(&bm);
-		//
-		//printf("%d", 0);
-		//CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
-		//dc.StretchBlt(50, 50, bm.bmWidth, bm.bmHeight, &memDC, 0, 0, bm.bmWidth, bm.bmHeight,SRCCOPY);
-		//memDC.SelectObject(pOldBitmap);
-		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
+
+	if (isImageDrawing)
+	{
+		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 0, 50);
+	}
+
+
+	if(isImageBltDrawing){ // bitmap != NULL 
+		CDC memDC;
+		if (!memDC.CreateCompatibleDC(&dc))
+		{
+			return;
+		}
+		BITMAP bm;
+		c_bitmap.GetBitmap(&bm);
+		//drawPicture(memDC, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 0, 0);
+		CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
+		dc.StretchBlt(400, 50, bmInfo.biWidth, bmInfo.biHeight, &memDC, 0, 0, bmInfo.biWidth, bmInfo.biHeight,SRCCOPY);
+		memDC.SelectObject(pOldBitmap);
 	}
 	else
 	{
 		fText(dc, lpsBiWidth, 10, 10);
 		fText(dc, lpsBiHeight, 10, 30);
-
 	}
-	
 	// TODO: Добавьте код обработки сообщений
 	// Не вызывайте CWnd::OnPaint() для сообщений рисования
 }
@@ -129,11 +129,15 @@ void  CChildView::OnBtnDrawClick() {
 	Invalidate();
 }
 
+void  CChildView::OnBtnDrawBltClick() {
+	isImageBltDrawing = !isImageBltDrawing;
+	Invalidate();
+}
 
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
-	if (isImageDrawing && c_bitmap.GetSafeHandle() != NULL)//c_bitmap.GetSafeHandle() != NULL && 
+	if (isImageBltDrawing )//c_bitmap.GetSafeHandle() != NULL && 
 	{
 		return true;
 	}

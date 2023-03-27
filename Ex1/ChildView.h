@@ -22,6 +22,7 @@ public:
 // Элементы
 public:
 	CButton btnDraw,
+			btnDrawBlt,
 			btnErase;
 	
 // Переменные
@@ -29,12 +30,12 @@ protected:
 
 	CFile* pictureFile;
 	CBitmap c_bitmap;
-	BYTE* mbitmap;
 	BITMAPFILEHEADER bmHeader;
 	BITMAPINFOHEADER bmInfo;
-	LPBITMAP lpBitmap;
+	BYTE* mbitmap;
+	BITMAP bmp;
 	bool isImageDrawing = false;
-
+	bool isImageBltDrawing = false;
 	COLORREF color = RGB(0, 255, 0);
 
 // Реализация
@@ -48,6 +49,7 @@ public:
 	// Созданные функции схемы сообщений
 protected:
 	afx_msg void OnBtnDrawClick();
+	afx_msg void OnBtnDrawBltClick();
 	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 public:

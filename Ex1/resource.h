@@ -8,11 +8,11 @@
 #define IDB_BTN_DRAW                    102
 #define IDB_BTNERASE                    103
 #define IDB_BTN_ERASE                   103
+#define IDB_BTN_DRAWBLT                 104
 #define IDR_MAINFRAME                   128
 #define IDR_Ex1TYPE                     130
 #define IDB_BITMAP1                     311
 #define IDB_BITMAP2                     312
-#define IDB_BITMAP3                     313
 #define IDB_BITMAP_MOUSE                313
 
 // Next default values for new objects

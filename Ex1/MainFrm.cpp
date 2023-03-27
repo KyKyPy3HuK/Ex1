@@ -48,7 +48,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//TODO
 
 	m_wndView.btnDraw.Create(_T("Draw"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(300, 10, 400, 30), &m_wndView, IDB_BTN_DRAW);
-
+	m_wndView.btnDrawBlt.Create(_T("DrawBlt"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(400, 10, 500, 30), &m_wndView, IDB_BTN_DRAWBLT);
 
 
 
@@ -72,7 +72,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	//  CREATESTRUCT cs
 	
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-	cs.lpszClass = AfxRegisterWndClass(CS_CLASSDC, LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(DKGRAY_BRUSH),
+	cs.lpszClass = AfxRegisterWndClass(CS_CLASSDC, LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(WHITE_BRUSH),
 		LoadIcon(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDR_MAINFRAME)));
 	return TRUE;
 }
