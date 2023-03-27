@@ -1,6 +1,5 @@
 ﻿
 // ChildView.cpp: реализация класса CChildView
-//
 
 #include "pch.h"
 #include "framework.h"
@@ -13,7 +12,7 @@
 #define new DEBUG_NEW
 #endif
 
-#define COLORS_COUNT 3
+#define BYTES_PER_PIXEL 3
 #define RED 2
 #define GREEN 1
 #define BLUE 0
@@ -42,11 +41,18 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
-	for (int i = 0; i < heigth * width * COLORS_COUNT; i += 3)
+	UINT widthInBytes = width * BYTES_PER_PIXEL;
+	UINT offset = (4 - (widthInBytes % 4)) % 4; //(((width * BYTES_PER_PIXEL) + 3) & ~3) - width * BYTES_PER_PIXEL;
+	UINT fullWidth = widthInBytes + offset;
+	for (int i = 0; i < heigth; i++)
 	{
-		int row = (i / 3) % width;
-		int column = heigth - (i / 3) / width;
-		dc.SetPixel(row + x, column + y, RGB(bitmap[i], bitmap[i + 1], bitmap[i+2]));
+		for (int j = 0; j < width; j++)
+		{
+			UINT column = j;
+			UINT row = heigth - i;
+			UINT k = (fullWidth * i + j * 3);
+			dc.SetPixel(column + x, row + y, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
+		}
 	}
 }
 // Обработчики сообщений CChildView
@@ -62,26 +68,21 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), LoadIcon(NULL,IDI_APPLICATION));
 	
 
-
-
-
-
-	pictureFile->Open(_T("YuiUSSR.bmp"), CFile::modeRead | CFile::shareDenyRead);
+	pictureFile->Open(_T("mouse.bmp"), CFile::modeRead | CFile::shareDenyRead);
 	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
 	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 	
 	LPBYTE bitmap = new BYTE [bmInfo.biSizeImage];
-	BYTE readByte;
+	LPBYTE readByte = new BYTE[bmInfo.biSizeImage];
 	
-	for (int i = 0; i < bmInfo.biSizeImage; i++)
-	{
-		pictureFile->Read(&readByte, sizeof(BYTE)); //read BLUE
-		bitmap[i] = readByte;
-	}
 
+	pictureFile->Read(readByte, sizeof(BYTE) * bmInfo.biSizeImage); //read BLUE
+	bitmap = readByte;
+			
+	mbitmap = bitmap;
 	c_bitmap.CreateBitmap(1024,628, bmInfo.biPlanes, bmInfo.biBitCount, bitmap);
 	c_bitmap.LoadBitmapW(IDB_BITMAP2);
-	mbitmap = bitmap;
+	
 	return TRUE;
 }
 
@@ -90,27 +91,27 @@ void CChildView::OnPaint()
 {
 	CPaintDC dc(this); // контекст устройства для рисования
 	
-	std::wstring str = std::to_wstring(bmInfo.biWidth);
+	std::wstring str = std::to_wstring(bmInfo.biSizeImage);
 	LPCTSTR lpsBiWidth = str.c_str();
 	std::wstring str1 = std::to_wstring(bmInfo.biHeight);
 	LPCTSTR lpsBiHeight = str1.c_str();
 
 	if(isImageDrawing && c_bitmap.GetSafeHandle() != NULL){ // bitmap != NULL 
 		
-		CDC memDC;
-		if (!memDC.CreateCompatibleDC(&dc))
-		{
-			return;
-		}
-		BITMAP bm;
-
-		c_bitmap.GetBitmap(&bm);
-
-		printf("%d", bm.bmBits);
-		CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
-		dc.StretchBlt(50, 50, bm.bmWidth, bm.bmHeight, &memDC, 0, 0, bm.bmWidth, bm.bmHeight,SRCCOPY);
-		memDC.SelectObject(pOldBitmap);
-		//drawPicture(memDC, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
+		//CDC memDC;
+		//if (!memDC.CreateCompatibleDC(&dc))
+		//{
+		//	return;
+		//}
+		//BITMAP bm;
+		//
+		//c_bitmap.GetBitmap(&bm);
+		//
+		//printf("%d", 0);
+		//CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
+		//dc.StretchBlt(50, 50, bm.bmWidth, bm.bmHeight, &memDC, 0, 0, bm.bmWidth, bm.bmHeight,SRCCOPY);
+		//memDC.SelectObject(pOldBitmap);
+		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 50, 50);
 	}
 	else
 	{
@@ -119,11 +120,7 @@ void CChildView::OnPaint()
 
 	}
 	
-	
 	// TODO: Добавьте код обработки сообщений
-	
-	
-	
 	// Не вызывайте CWnd::OnPaint() для сообщений рисования
 }
 
