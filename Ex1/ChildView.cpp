@@ -137,7 +137,7 @@ void  CChildView::OnBtnDrawBltClick() {
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
-	if (isImageBltDrawing )//c_bitmap.GetSafeHandle() != NULL && 
+	if (isImageBltDrawing)//c_bitmap.GetSafeHandle() != NULL && 
 	{
 		return true;
 	}

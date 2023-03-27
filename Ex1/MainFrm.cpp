@@ -60,10 +60,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 3;
-	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 3;
-	cs.y = ((cs.cy * 3) - cs.cy) / 2;
-	cs.x = ((cs.cx * 3) - cs.cx) / 2;
+	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 1;
+	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 1;
+	cs.y = 0;//::GetSystemMetrics(SM_CYSCREEN) / 1;
+	cs.x = 0;//::GetSystemMetrics(SM_CXSCREEN) / 1;
 
 
 	if( !CFrameWnd::PreCreateWindow(cs) )
