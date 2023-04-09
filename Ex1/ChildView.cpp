@@ -21,7 +21,7 @@
 
 CChildView::CChildView()
 {
-	pictureFile = new CFile();
+	m_pictureFile = new CFile();
 }
 
 CChildView::~CChildView()
@@ -66,21 +66,50 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
-		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), LoadIcon(NULL,IDI_APPLICATION));
+					::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), 
+					LoadIcon(NULL,IDI_APPLICATION));
 	
 
-	pictureFile->Open(_T("mouse.bmp"), CFile::modeRead | CFile::shareDenyRead);
-	pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
-	pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
-	
-	LPBYTE bitmap = new BYTE [bmInfo.biSizeImage];
-	LPBYTE readByte = new BYTE [bmInfo.biSizeImage];
-	
-	pictureFile->Read(readByte, sizeof(BYTE) * bmInfo.biSizeImage); //read BLUE
-	bitmap = readByte;
-	mbitmap = readByte;
-	
-	c_bitmap.LoadBitmapW(IDB_BITMAP_MOUSE);
+	m_pictureFile->Open(_T("mouse.bmp"), CFile::modeRead | CFile::shareDenyRead);
+	m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
+	m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+
+	uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
+
+	if (bmInfo.biBitCount <= 8)
+	{
+		uint8_t palletColorsCount;
+		if (bmInfo.biBitCount = 8)
+		{
+			palletColorsCount = 256;
+			m_pallet = new RGBQUAD[256];
+		}
+		else if (bmInfo.biBitCount = 4)
+		{
+			palletColorsCount = 16;
+			m_pallet = new RGBQUAD[16];
+		}
+		else if (bmInfo.biBitCount = 1)
+		{
+			palletColorsCount = 2;
+			m_pallet = new RGBQUAD[2];
+		}
+
+		m_pictureFile->Read(&m_pallet, sizeof(RGBQUAD) * palletColorsCount);
+	}
+
+	m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
+
+	CDC dc;
+	dc.CreateCompatibleDC(this->GetDC());
+
+	m_bitmapInfo.bmiHeader = bmInfo;
+	m_DIBSectionBitmap = new uint8_t[bmInfo.biSizeImage];
+	m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS, 
+				(void**)&m_DIBSectionBitmap, NULL, 0);
+
+	memcpy(m_DIBSectionBitmap, inputBitmap, bmInfo.biSizeImage);
+	m_bitmap = inputBitmap;
 	
 	return TRUE;
 }
@@ -98,7 +127,7 @@ void CChildView::OnPaint()
 
 	if (isImageDrawing)
 	{
-		drawPicture(dc, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 0, 50);
+		drawPicture(dc, m_bitmap, bmInfo.biWidth, bmInfo.biHeight, 0, 50);
 	}
 
 
@@ -108,11 +137,10 @@ void CChildView::OnPaint()
 		{
 			return;
 		}
-		BITMAP bm;
-		c_bitmap.GetBitmap(&bm);
-		//drawPicture(memDC, mbitmap, bmInfo.biWidth, bmInfo.biHeight, 0, 0);
-		CBitmap* pOldBitmap = (CBitmap*)memDC.SelectObject(&c_bitmap);
-		dc.StretchBlt(400, 50, bmInfo.biWidth, bmInfo.biHeight, &memDC, 0, 0, bmInfo.biWidth, bmInfo.biHeight,SRCCOPY);
+
+		HGDIOBJ pOldBitmap = memDC.SelectObject(m_HBitmap);
+		dc.StretchBlt(400, 50, m_bitmapInfo.bmiHeader.biWidth, m_bitmapInfo.bmiHeader.biHeight
+			, &memDC, 0, 0, m_bitmapInfo.bmiHeader.biWidth, m_bitmapInfo.bmiHeader.biHeight,SRCCOPY);
 		memDC.SelectObject(pOldBitmap);
 	}
 	else
@@ -142,7 +170,4 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 		return true;
 	}
 	return CWnd::OnEraseBkgnd(pDC);
-}
-BOOL CChildView::SetBitmap(UINT nIDResourse){
-	return c_bitmap.LoadBitmapW(nIDResourse);
 }

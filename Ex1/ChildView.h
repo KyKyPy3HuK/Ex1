@@ -28,12 +28,18 @@ public:
 // Переменные
 protected:
 
-	CFile* pictureFile;
-	CBitmap c_bitmap;
+	CFile* m_pictureFile;
+
 	BITMAPFILEHEADER bmHeader;
 	BITMAPINFOHEADER bmInfo;
-	BYTE* mbitmap;
-	BITMAP bmp;
+
+	uint8_t* m_bitmap;
+	uint8_t* m_DIBSectionBitmap;
+
+	RGBQUAD* m_pallet;
+	HBITMAP m_HBitmap;
+	BITMAPINFO m_bitmapInfo;
+
 	bool isImageDrawing = false;
 	bool isImageBltDrawing = false;
 	COLORREF color = RGB(0, 255, 0);
