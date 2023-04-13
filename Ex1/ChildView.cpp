@@ -38,7 +38,17 @@ END_MESSAGE_MAP()
 
 uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap)
 {
-	uint8_t		bpp					= biInfo.bmiHeader.biBitCount;
+	uint8_t		clrUsed				= biInfo.bmiHeader.biClrUsed;
+	uint8_t		bitCount			= biInfo.bmiHeader.biBitCount;
+	uint8_t		bpp;
+	if (clrUsed <= 2 && bitCount == 8)
+	{
+		bpp = 1;
+	}
+	else if (clrUsed == 6)
+	{
+
+	}
 	uint32_t	width				= biInfo.bmiHeader.biWidth;
 	uint32_t	height				= biInfo.bmiHeader.biHeight;
 	uint32_t	sizeInBytes			= biInfo.bmiHeader.biSizeImage;
@@ -56,17 +66,32 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 
 	uint8_t*	n_bitmap = new uint8_t[n_sizeInBytes];
 
-	for (int i = 0; i < width; ++i)
+	RGBQUAD** pixelMap = new RGBQUAD* [height];
+	for (int i = 0; i < height; i++)
 	{
-		for (int j = 0; j < height; ++j)
+		pixelMap[i] = new RGBQUAD[width];
+	}
+	
+
+	if (bpp == 1)
+	{
+		for (int i = 0; i < height; i++)
 		{
-			bitmap[i];
+			int cnt = 0;
+			for (int j = 0; j < widthInBytes; j++)
+			{
+				uint8_t k = (fullWidthInBytes * i + j);
+
+				bitSet tempBS = bitmap[k];
+
+				for ( ; cnt < width || cnt < 8 * (j + 1); ++cnt)
+				{
+					uint8_t bitNum = tempBS.getBit(cnt % 8);
+					pixelMap[i][cnt] = pallet[bitNum];
+				}
+			}
 		}
 	}
-
-
-
-
 	return n_bitmap;
 }
 
@@ -195,7 +220,7 @@ void CChildView::OnAppOpen() {
 		m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 
 		uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
-
+		bool isPalletBmp = false;
 		if (bmInfo.biBitCount <= 8)
 		{
 			uint8_t palletColorsCount;
@@ -216,15 +241,25 @@ void CChildView::OnAppOpen() {
 			}
 
 			m_pictureFile->Read(&m_pallet, sizeof(RGBQUAD) * palletColorsCount);
-
+			isPalletBmp = true;
 		}
-
+		
 		m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
 
 		CDC dc;
 		dc.CreateCompatibleDC(this->GetDC());
 
 		m_bitmapInfo.bmiHeader = bmInfo;
+
+		if (isPalletBmp)
+		{
+			palletToNormalBitmap(m_bitmapInfo, m_pallet, inputBitmap);
+		}
+		else
+		{
+		
+		}
+		
 		m_DIBSectionBitmap = new uint8_t[bmInfo.biSizeImage];
 		m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
 			(void**)&m_DIBSectionBitmap, NULL, 0);
