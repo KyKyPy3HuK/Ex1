@@ -183,6 +183,7 @@ void CEx1App::OnAppAbout()
 	aboutDlg.DoModal();
 }
 
+
 // Обработчики сообщений CEx1App
 
 

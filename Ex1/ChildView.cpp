@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_BN_CLICKED(IDB_BTN_DRAW, OnBtnDrawClick)
 	ON_BN_CLICKED(IDB_BTN_DRAWBLT, OnBtnDrawBltClick)
 	ON_WM_ERASEBKGND()
+	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
 
 void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
@@ -170,4 +171,14 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 		return true;
 	}
 	return CWnd::OnEraseBkgnd(pDC);
+}
+
+
+void CChildView::OnAppOpen() {
+	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL,NULL,NULL, 0, 1);
+
+	if (opnFileDlg.DoModal() == IDOK)
+	{
+		AfxMessageBox(opnFileDlg.GetPathName());
+	}
 }

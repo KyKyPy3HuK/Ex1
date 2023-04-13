@@ -57,6 +57,7 @@ protected:
 	afx_msg void OnBtnDrawClick();
 	afx_msg void OnBtnDrawBltClick();
 	afx_msg void OnPaint();
+	afx_msg void OnAppOpen();
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
