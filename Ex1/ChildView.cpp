@@ -71,46 +71,7 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 					LoadIcon(NULL,IDI_APPLICATION));
 	
 
-	m_pictureFile->Open(_T("mouse.bmp"), CFile::modeRead | CFile::shareDenyRead);
-	m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
-	m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
-
-	uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
-
-	if (bmInfo.biBitCount <= 8)
-	{
-		uint8_t palletColorsCount;
-		if (bmInfo.biBitCount = 8)
-		{
-			palletColorsCount = 256;
-			m_pallet = new RGBQUAD[256];
-		}
-		else if (bmInfo.biBitCount = 4)
-		{
-			palletColorsCount = 16;
-			m_pallet = new RGBQUAD[16];
-		}
-		else if (bmInfo.biBitCount = 1)
-		{
-			palletColorsCount = 2;
-			m_pallet = new RGBQUAD[2];
-		}
-
-		m_pictureFile->Read(&m_pallet, sizeof(RGBQUAD) * palletColorsCount);
-	}
-
-	m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
-
-	CDC dc;
-	dc.CreateCompatibleDC(this->GetDC());
-
-	m_bitmapInfo.bmiHeader = bmInfo;
-	m_DIBSectionBitmap = new uint8_t[bmInfo.biSizeImage];
-	m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS, 
-				(void**)&m_DIBSectionBitmap, NULL, 0);
-
-	memcpy(m_DIBSectionBitmap, inputBitmap, bmInfo.biSizeImage);
-	m_bitmap = inputBitmap;
+	
 	
 	return TRUE;
 }
@@ -181,4 +142,44 @@ void CChildView::OnAppOpen() {
 	{
 		AfxMessageBox(opnFileDlg.GetPathName());
 	}
+	m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyRead);
+	m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
+	m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+
+	uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
+
+	if (bmInfo.biBitCount <= 8)
+	{
+		uint8_t palletColorsCount;
+		if (bmInfo.biBitCount = 8)
+		{
+			palletColorsCount = 256;
+			m_pallet = new RGBQUAD[256];
+		}
+		else if (bmInfo.biBitCount = 4)
+		{
+			palletColorsCount = 16;
+			m_pallet = new RGBQUAD[16];
+		}
+		else if (bmInfo.biBitCount = 1)
+		{
+			palletColorsCount = 2;
+			m_pallet = new RGBQUAD[2];
+		}
+
+		m_pictureFile->Read(&m_pallet, sizeof(RGBQUAD) * palletColorsCount);
+	}
+
+	m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
+
+	CDC dc;
+	dc.CreateCompatibleDC(this->GetDC());
+
+	m_bitmapInfo.bmiHeader = bmInfo;
+	m_DIBSectionBitmap = new uint8_t[bmInfo.biSizeImage];
+	m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
+		(void**)&m_DIBSectionBitmap, NULL, 0);
+
+	memcpy(m_DIBSectionBitmap, inputBitmap, bmInfo.biSizeImage);
+	m_bitmap = inputBitmap;
 }
