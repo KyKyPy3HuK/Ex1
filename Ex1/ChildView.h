@@ -40,12 +40,18 @@ protected:
 	HBITMAP m_HBitmap;
 	BITMAPINFO m_bitmapInfo;
 
+	BITMAPINFO m_biInfo;
+	BITMAP m_bm;
+
+	bool isFileOpen = false;
 	bool isImageDrawing = false;
 	bool isImageBltDrawing = false;
 	COLORREF color = RGB(0, 255, 0);
 
 // Реализация
 public:
+
+	uint8_t* palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap);
 
 	void fText(CPaintDC& dc, LPCTSTR text, int x, int y);
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
