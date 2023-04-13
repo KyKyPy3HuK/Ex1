@@ -22,6 +22,8 @@
 
 // CEx1App
 
+
+
 BEGIN_MESSAGE_MAP(CEx1App, CWinApp)
 	ON_COMMAND(ID_APP_ABOUT, &CEx1App::OnAppAbout)
 END_MESSAGE_MAP()
