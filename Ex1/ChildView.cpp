@@ -7,6 +7,9 @@
 #include "ChildView.h"
 #include <string>
 
+#define getBit(val,x) ((val >> x) & 0x1)
+#define setBit(val,x) (val |= (1 << x))
+#define clrBit(val,x) (val &= ~(1 << x))
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,16 +42,7 @@ END_MESSAGE_MAP()
 uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap)
 {
 	uint8_t		clrUsed				= biInfo.bmiHeader.biClrUsed;
-	uint8_t		bitCount			= biInfo.bmiHeader.biBitCount;
-	uint8_t		bpp;
-	if (clrUsed <= 2 && bitCount == 8)
-	{
-		bpp = 1;
-	}
-	else if (clrUsed == 6)
-	{
-
-	}
+	uint8_t		bpp					= biInfo.bmiHeader.biBitCount;
 	uint32_t	width				= biInfo.bmiHeader.biWidth;
 	uint32_t	height				= biInfo.bmiHeader.biHeight;
 	uint32_t	sizeInBytes			= biInfo.bmiHeader.biSizeImage;
@@ -63,7 +57,7 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 	uint32_t	n_alignBytes		= (4 - (n_widthInBytes % 4)) % 4;
 	uint32_t	n_fullWidthInBytes	= n_widthInBytes + n_alignBytes;
 	uint32_t	n_sizeInBytes		= n_fullWidthInBytes * height;
-
+	 
 	uint8_t*	n_bitmap = new uint8_t[n_sizeInBytes];
 
 	RGBQUAD** pixelMap = new RGBQUAD* [height];
@@ -82,11 +76,11 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 			{
 				uint8_t k = (fullWidthInBytes * i + j);
 
-				bitSet tempBS = bitmap[k];
+				uint8_t tempByte = bitmap[k];
 
 				for ( ; cnt < width || cnt < 8 * (j + 1); ++cnt)
 				{
-					uint8_t bitNum = tempBS.getBit(cnt % 8);
+					uint8_t bitNum = getBit(tempByte,(cnt % 8));
 					pixelMap[i][cnt] = pallet[bitNum];
 				}
 			}
@@ -99,7 +93,6 @@ void CChildView::fText(CPaintDC& dc, LPCTSTR text, int x, int y)
 {
 	dc.TextOutW(x, y, text);
 }
-
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
 	UINT widthInBytes = width * BYTES_PER_PIXEL;
@@ -130,7 +123,6 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	
 	return TRUE;
 }
-
 
 void CChildView::OnPaint() 
 {
@@ -223,25 +215,9 @@ void CChildView::OnAppOpen() {
 		bool isPalletBmp = false;
 		if (bmInfo.biBitCount <= 8)
 		{
-			uint8_t palletColorsCount;
-			if (bmInfo.biBitCount = 8)
-			{
-				palletColorsCount = 256;
-				m_pallet = new RGBQUAD[256];
-			}
-			else if (bmInfo.biBitCount = 4)
-			{
-				palletColorsCount = 16;
-				m_pallet = new RGBQUAD[16];
-			}
-			else if (bmInfo.biBitCount = 1)
-			{
-				palletColorsCount = 2;
-				m_pallet = new RGBQUAD[2];
-			}
-
-			m_pictureFile->Read(&m_pallet, sizeof(RGBQUAD) * palletColorsCount);
-			isPalletBmp = true;
+			m_pallet = new RGBQUAD[bmInfo.biClrUsed];
+			m_pictureFile->Read(m_pallet, sizeof(RGBQUAD) * bmInfo.biClrUsed);
+			isPalletBmp = true;  
 		}
 		
 		m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
@@ -254,10 +230,6 @@ void CChildView::OnAppOpen() {
 		if (isPalletBmp)
 		{
 			palletToNormalBitmap(m_bitmapInfo, m_pallet, inputBitmap);
-		}
-		else
-		{
-		
 		}
 		
 		m_DIBSectionBitmap = new uint8_t[bmInfo.biSizeImage];

@@ -80,19 +80,6 @@ BOOL CEx1App::InitInstance()
 		return FALSE;
 	}
 	
-
-
-	//if (AfxMessageBox(101, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO)
-	//{
-	//	AfxMessageBox(_T("NO"),MB_ICONSTOP);
-	//}
-	//else
-	//{
-	//	AfxMessageBox(_T("YES"), MB_ICONEXCLAMATION);
-	//}
-
-	
-
 	AfxEnableControlContainer();
 
 	EnableTaskbarInteraction(FALSE);
@@ -124,9 +111,6 @@ BOOL CEx1App::InitInstance()
 
 	// Разрешить использование расширенных символов в горячих клавишах меню
 	CMFCToolBar::m_bExtCharTranslation = TRUE;
-
-
-
 
 	// Одно и только одно окно было инициализировано, поэтому отобразите и обновите его
 	pFrame->ShowWindow(SW_SHOW);
