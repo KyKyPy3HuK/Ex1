@@ -58,13 +58,7 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 	uint32_t	n_sizeInBytes		= n_fullWidthInBytes * height;
 	 
 	uint8_t*	n_bitmap = new uint8_t[n_sizeInBytes];
-	//ZeroMemory(n_bitmap, n_sizeInBytes);
-	memset(n_bitmap, 121, n_sizeInBytes);
-	RGBQUAD** pixelMap = new RGBQUAD* [height];
-	for (int i = 0; i < height; i++)
-	{
-		pixelMap[i] = new RGBQUAD[width];
-	}
+	memset(n_bitmap, 0, n_sizeInBytes);
 	
 	if (bpp == 1)
 	{
@@ -74,9 +68,7 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 			for (int j = 0; j < widthInBytes; j++)
 			{
 				uint32_t k = (fullWidthInBytes * i + j);
-
 				uint8_t tempByte = bitmap[k];
-
 				for ( ; cnt < width && cnt < 8 * (j + 1); ++cnt)
 				{
 					uint8_t bitNum = getBit(tempByte,7 - (cnt % 8));
@@ -84,13 +76,25 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 					n_bitmap[n_k]	  = pallet[bitNum].rgbGreen;
 					n_bitmap[n_k + 1] = pallet[bitNum].rgbRed;
 					n_bitmap[n_k + 2] = pallet[bitNum].rgbBlue;
-
-					pixelMap[i][cnt] = pallet[bitNum];
 				}
 			}
 		}
 	}
-
+	else if (bpp == 8)
+	{
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				uint32_t k = (fullWidthInBytes * i + j);
+				uint8_t tempByte = bitmap[k];
+				uint32_t n_k = (((j) * 3) + (i * n_fullWidthInBytes));
+				n_bitmap[n_k	] = pallet[tempByte].rgbBlue;
+				n_bitmap[n_k + 1] = pallet[tempByte].rgbGreen;
+				n_bitmap[n_k + 2] = pallet[tempByte].rgbRed;
+			}
+		}
+	}
 	biInfo.bmiHeader.biSizeImage = n_sizeInBytes;
 	biInfo.bmiHeader.biBitCount = n_bpp;
 	biInfo.bmiHeader.biClrUsed = 0;
