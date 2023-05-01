@@ -139,23 +139,41 @@ void CChildView::OnPaint()
 	CRect winRect = new CRect;
 	GetWindowRect(winRect);
 
-	int32_t VRange = m_bitmapInfo.bmiHeader.biHeight - winRect.Height();
-	int32_t HRange = m_bitmapInfo.bmiHeader.biWidth - winRect.Width();
+	int32_t VRange = m_bitmapInfo.bmiHeader.biHeight - winRect.Height() + 4;
+	int32_t HRange = m_bitmapInfo.bmiHeader.biWidth - winRect.Width() + 4;
+
 	if (VRange > 0)
 	{
 		SetScrollRange(SB_VERT, 0, VRange);
+		if (HRange + 18 > 0)
+		{
+			SetScrollRange(SB_VERT, 0, VRange + 18);
+			SetScrollRange(SB_HORZ, 0, HRange + 18);
+		}
+		else
+		{
+			SetScrollRange(SB_HORZ, 0, 0);
+			m_scrBarHPos = 0;
+		}
+	}
+	else if (HRange > 0)
+	{
+		SetScrollRange(SB_HORZ, 0, HRange);
+		if (VRange + 18 > 0)
+		{
+			SetScrollRange(SB_HORZ, 0, HRange + 18);
+			SetScrollRange(SB_VERT, 0, VRange + 18);
+		}
+		else
+		{
+			SetScrollRange(SB_VERT, 0, 0);
+			m_scrBarVPos = 0;
+		}
 	}
 	else
 	{
 		SetScrollRange(SB_VERT, 0, 0);
 		m_scrBarVPos = 0;
-	}
-
-	if (HRange > 0) {
-		SetScrollRange(SB_HORZ, 0, HRange);
-	}
-	else
-	{
 		SetScrollRange(SB_HORZ, 0, 0);
 		m_scrBarHPos = 0;
 	}
