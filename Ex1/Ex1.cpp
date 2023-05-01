@@ -78,19 +78,6 @@ BOOL CEx1App::InitInstance()
 		AfxMessageBox(IDP_OLE_INIT_FAILED);
 		return FALSE;
 	}
-	
-
-
-	//if (AfxMessageBox(101, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO)
-	//{
-	//	AfxMessageBox(_T("NO"),MB_ICONSTOP);
-	//}
-	//else
-	//{
-	//	AfxMessageBox(_T("YES"), MB_ICONEXCLAMATION);
-	//}
-
-	
 
 	AfxEnableControlContainer();
 
@@ -117,7 +104,7 @@ BOOL CEx1App::InitInstance()
 	m_pMainWnd = pFrame;
 	// создайте и загрузите рамку с его ресурсами
 	pFrame->LoadFrame(IDR_MAINFRAME,
-		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, nullptr,
+		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE , nullptr,
 		nullptr);
 
 

@@ -21,16 +21,10 @@
 #define BLUE 0
 
 // CChildView
-void CChildView::DoDataExchange(CDataExchange* pDX)
-{
-	CWnd::DoDataExchange(pDX);
-	DDX_Scroll(pDX, IDB_SCRBAR_V, m_scrBarVPos);
-}
 
 CChildView::CChildView()
 {
-	m_scrBarVPos = 0; 
-	m_scrBarHPos = 0;
+	m_scrBarVPos = 0;
 	m_pictureFile = new CFile();
 }
 
@@ -40,6 +34,8 @@ CChildView::~CChildView()
 
 BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_PAINT()
+	ON_WM_VSCROLL()
+	ON_WM_HSCROLL()
 	ON_WM_ERASEBKGND()
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
@@ -140,6 +136,29 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 void CChildView::OnPaint() 
 {
 	CPaintDC dc(this); // контекст устройства для рисования
+	CRect winRect = new CRect;
+	GetWindowRect(winRect);
+
+	int32_t VRange = m_bitmapInfo.bmiHeader.biHeight - winRect.Height();
+	int32_t HRange = m_bitmapInfo.bmiHeader.biWidth - winRect.Width();
+	if (VRange > 0)
+	{
+		SetScrollRange(SB_VERT, 0, VRange);
+	}
+	else
+	{
+		SetScrollRange(SB_VERT, 0, 0);
+		m_scrBarVPos = 0;
+	}
+
+	if (HRange > 0) {
+		SetScrollRange(SB_HORZ, 0, HRange);
+	}
+	else
+	{
+		SetScrollRange(SB_HORZ, 0, 0);
+		m_scrBarHPos = 0;
+	}
 
 	if(isFileOpen){ // bitmap != NULL 
 		CDC memDC;
@@ -150,8 +169,9 @@ void CChildView::OnPaint()
 
 		HGDIOBJ pOldBitmap = memDC.SelectObject(m_HBitmap);
 		dc.StretchBlt(0, 0, m_bitmapInfo.bmiHeader.biWidth, m_bitmapInfo.bmiHeader.biHeight
-			, &memDC, 0, 0, m_bitmapInfo.bmiHeader.biWidth, m_bitmapInfo.bmiHeader.biHeight,SRCCOPY);
+			, &memDC, 0 + m_scrBarHPos, 0 + m_scrBarVPos, m_bitmapInfo.bmiHeader.biWidth, m_bitmapInfo.bmiHeader.biHeight,SRCCOPY);
 		memDC.SelectObject(pOldBitmap);
+		isImageDrawed = true;
 	}
 
 	// TODO: Добавьте код обработки сообщений
@@ -160,12 +180,100 @@ void CChildView::OnPaint()
 
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: добавьте свой код обработчика сообщений или вызов стандартного
-	//if (isImageBltDrawing)//c_bitmap.GetSafeHandle() != NULL && 
-	//{
-	//	return true;
-	//}
+	//TODO: добавьте свой код обработчика сообщений или вызов стандартного
+	if (isImageDrawed)//c_bitmap.GetSafeHandle() != NULL && 
+	{
+		return false;
+	}
 	return CWnd::OnEraseBkgnd(pDC);
+}
+
+void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (isFileOpen)
+	{
+	// TODO: Add your message handler code here and/or call default
+	
+	m_scrBarVPos = nPos; // Сохранение текущей позиции ползунка
+	switch (nSBCode) // Что было нажато на линейке
+	{
+		// Зацепили и потащили ползунок
+	case SB_THUMBPOSITION:
+		// Выставить ползунок в текущую позицию
+		SetScrollPos(SB_VERT, nPos);
+		break;
+		// Закончили работу с линейкой
+	case SB_ENDSCROLL:
+		// Получить текущую позицию ползунка
+		m_scrBarVPos = GetScrollPos(SB_VERT);
+		break;
+		// Нажали на стрелку вверх (наверху линейки)
+	case SB_LINEUP:
+		nPos = GetScrollPos(SB_VERT);
+		nPos--;
+		if (nPos < 0)
+			nPos = 0;
+		SetScrollPos(SB_VERT, nPos);
+		m_scrBarVPos = nPos;
+		break;
+			// Нажали на стрелку вниз (внизу линейки)
+	case SB_LINEDOWN:
+		nPos = GetScrollPos(SB_VERT);
+		nPos++;
+		if (nPos > 100)
+			nPos = 100;
+		SetScrollPos(SB_VERT, nPos);
+		m_scrBarVPos = nPos;
+		break;
+	}
+	// Перерисовать окно
+	Invalidate();
+	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
+	}
+}
+
+void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (isFileOpen)
+	{
+		// TODO: Add your message handler code here and/or call default
+
+		m_scrBarHPos = nPos; // Сохранение текущей позиции ползунка
+		switch (nSBCode) // Что было нажато на линейке
+		{
+			// Зацепили и потащили ползунок
+		case SB_THUMBPOSITION:
+			// Выставить ползунок в текущую позицию
+			SetScrollPos(SB_HORZ, nPos);
+			break;
+			// Закончили работу с линейкой
+		case SB_ENDSCROLL:
+			// Получить текущую позицию ползунка
+			m_scrBarHPos = GetScrollPos(SB_HORZ);
+			break;
+			// Нажали на стрелку вверх (наверху линейки)
+		case SB_LINEUP:
+			nPos = GetScrollPos(SB_HORZ);
+			nPos--;
+			if (nPos < 0)
+				nPos = 0;
+			SetScrollPos(SB_HORZ, nPos);
+			m_scrBarHPos = nPos;
+			break;
+			// Нажали на стрелку вниз (внизу линейки)
+		case SB_LINEDOWN:
+			nPos = GetScrollPos(SB_HORZ);
+			nPos++;
+			if (nPos > 100)
+				nPos = 100;
+			SetScrollPos(SB_HORZ, nPos);
+			m_scrBarHPos = nPos;
+			break;
+		}
+		// Перерисовать окно
+		Invalidate();
+		CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
+	}
 }
 
 void CChildView::OnAppOpen() {
@@ -177,6 +285,7 @@ void CChildView::OnAppOpen() {
 		{
 			m_pictureFile->Close();
 		}
+		isImageDrawed = false;
 		isFileOpen = true;
 
 		m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyRead);
@@ -210,6 +319,7 @@ void CChildView::OnAppOpen() {
 
 		memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
 		m_bitmap = inputBitmap;
+
 		Invalidate();
 	}
 	else {

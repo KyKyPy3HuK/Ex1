@@ -45,7 +45,7 @@ protected:
 
 	BITMAPINFO m_biInfo;
 	BITMAP m_bm;
-
+	bool isImageDrawed = false;
 	bool isFileOpen = false;
 	bool isImageDrawing = false;
 	bool isImageBltDrawing = false;
@@ -56,14 +56,15 @@ public:
 
 	uint8_t* palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap);
 
-	void fText(CPaintDC& dc, LPCTSTR text, int x, int y);
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	virtual ~CChildView();
 
 	// Созданные функции схемы сообщений
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	afx_msg void OnScrollH();
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos,
+		CScrollBar* pScrollBar);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos,
+		CScrollBar* pScrollBar);
 	afx_msg void OnPaint();
 	afx_msg void OnAppOpen();
 	DECLARE_MESSAGE_MAP()

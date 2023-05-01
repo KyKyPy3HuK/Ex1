@@ -38,7 +38,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// создать представление для размещения рабочей области рамки
-	if (!m_wndView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW,
+	if (!m_wndView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW | WS_VSCROLL | WS_HSCROLL,
 		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, nullptr)) //
 	{
 		TRACE0("Не удалось создать окно представлений\n");
@@ -53,10 +53,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 1;
-	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 1;
-	cs.y = 0;//::GetSystemMetrics(SM_CYSCREEN) / 1;
-	cs.x = 0;//::GetSystemMetrics(SM_CXSCREEN) / 1;
+	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 1 - 100;
+	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 1 - 100;
+	cs.y = 50;//::GetSystemMetrics(SM_CYSCREEN) / 1;
+	cs.x = 50;//::GetSystemMetrics(SM_CXSCREEN) / 1;
 
 
 	if( !CFrameWnd::PreCreateWindow(cs) )
