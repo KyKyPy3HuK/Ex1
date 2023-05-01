@@ -11,6 +11,7 @@
 #include <string.h>
 #include <iostream>
 #include "stdio.h"
+#include "ChildView.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif

@@ -46,24 +46,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	//TODO
-
-	m_wndView.btnDraw.Create(_T("Draw"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(300, 10, 400, 30), &m_wndView, IDB_BTN_DRAW);
-
-
-
-
-
-
+	//m_wndView.m_scrBarV.Create();
 
 	return 0;
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 3;
-	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 3;
-	cs.y = ((cs.cy * 3) - cs.cy) / 2;
-	cs.x = ((cs.cx * 3) - cs.cx) / 2;
+	cs.cy = ::GetSystemMetrics(SM_CYSCREEN) / 1;
+	cs.cx = ::GetSystemMetrics(SM_CXSCREEN) / 1;
+	cs.y = 0;//::GetSystemMetrics(SM_CYSCREEN) / 1;
+	cs.x = 0;//::GetSystemMetrics(SM_CXSCREEN) / 1;
 
 
 	if( !CFrameWnd::PreCreateWindow(cs) )
@@ -72,7 +65,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	//  CREATESTRUCT cs
 	
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-	cs.lpszClass = AfxRegisterWndClass(CS_CLASSDC, LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(DKGRAY_BRUSH),
+	cs.lpszClass = AfxRegisterWndClass(CS_CLASSDC, LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(WHITE_BRUSH),
 		LoadIcon(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDR_MAINFRAME)));
 	return TRUE;
 }
