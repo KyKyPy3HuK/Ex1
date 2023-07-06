@@ -142,13 +142,15 @@ void CChildView::OnPaint()
 	int32_t VRange = m_bitmapInfo.bmiHeader.biHeight - winRect.Height() + 4;
 	int32_t HRange = m_bitmapInfo.bmiHeader.biWidth - winRect.Width() + 4;
 
+	const uint8_t SCROLL_OFFSET = 18;
+
 	if (VRange > 0)
 	{
 		SetScrollRange(SB_VERT, 0, VRange);
-		if (HRange + 18 > 0)
+		if (HRange + SCROLL_OFFSET > 0)
 		{
-			SetScrollRange(SB_VERT, 0, VRange + 18);
-			SetScrollRange(SB_HORZ, 0, HRange + 18);
+			SetScrollRange(SB_VERT, 0, VRange + SCROLL_OFFSET);
+			SetScrollRange(SB_HORZ, 0, HRange + SCROLL_OFFSET);
 		}
 		else
 		{
@@ -159,10 +161,10 @@ void CChildView::OnPaint()
 	else if (HRange > 0)
 	{
 		SetScrollRange(SB_HORZ, 0, HRange);
-		if (VRange + 18 > 0)
+		if (VRange + SCROLL_OFFSET > 0)
 		{
-			SetScrollRange(SB_HORZ, 0, HRange + 18);
-			SetScrollRange(SB_VERT, 0, VRange + 18);
+			SetScrollRange(SB_HORZ, 0, HRange + SCROLL_OFFSET);
+			SetScrollRange(SB_VERT, 0, VRange + SCROLL_OFFSET);
 		}
 		else
 		{
