@@ -1,6 +1,6 @@
 ﻿
 // ChildView.cpp: реализация класса CChildView
-
+#include <tiffio.h>
 #include "pch.h"
 #include "framework.h"
 #include "Ex1.h"
