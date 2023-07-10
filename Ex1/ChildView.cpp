@@ -6,6 +6,7 @@
 #include "Ex1.h"
 #include "ChildView.h"
 #include <string>
+#include <regex>
 
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
@@ -297,7 +298,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 void CChildView::OnAppOpen() {
-	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("bmp Files (*.bmp)|*.bmp|"),NULL, 0, 1);
+	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("BMP files (*.bmp)|*.bmp|TIFF files (*.tiff *.tif)|*.tiff *.tif|"),NULL, 0, 1);
 
 	if (opnFileDlg.DoModal() == IDOK)
 	{
@@ -309,6 +310,12 @@ void CChildView::OnAppOpen() {
 		isFileOpen = true;
 
 		m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyRead);
+
+		CString ext = opnFileDlg.GetFileExt(); // Получение расширения файла
+
+		if ( ext == "bmp") //Если файл имеет расширение bmp
+		{
+		
 		m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
 		m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 
@@ -336,10 +343,15 @@ void CChildView::OnAppOpen() {
 		m_DIBSectionBitmap = new uint8_t[m_bitmapInfo.bmiHeader.biSizeImage];
 		m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
 			(void**)&m_DIBSectionBitmap, NULL, 0);
-
 		memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
 		m_bitmap = inputBitmap;
-
+		}
+		else if (ext == "tif" || ext == "tiff")
+		{
+			const char* filePath = CT2A(opnFileDlg.GetPathName());
+			TIFF* tiff = TIFFOpen(filePath, "r");
+			printf("%d", TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH));
+		}
 		Invalidate();
 	}
 	else {

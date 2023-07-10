@@ -1,7 +1,7 @@
 ﻿
 // Ex1.cpp: определяет поведение классов для приложения.
 //
-
+#include <tiffio.h>
 #include "pch.h"
 #include "framework.h"
 #include "afxwinappex.h"
