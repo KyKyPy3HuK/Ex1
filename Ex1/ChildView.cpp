@@ -1,13 +1,12 @@
 ﻿
 // ChildView.cpp: реализация класса CChildView
-#include <tiffio.h>
+
 #include "pch.h"
 #include "framework.h"
 #include "Ex1.h"
 #include "ChildView.h"
 #include <string>
-#include <regex>
-
+#include <tiffio.h>
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
@@ -298,7 +297,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 void CChildView::OnAppOpen() {
-	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("BMP files (*.bmp)|*.bmp|TIFF files (*.tiff *.tif)|*.tiff *.tif|"),NULL, 0, 1);
+	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("BMP files (*.bmp)|*.bmp|TIFF files (*.tif)|*.tif|"),NULL, 0, 1);
 
 	if (opnFileDlg.DoModal() == IDOK)
 	{
@@ -348,8 +347,8 @@ void CChildView::OnAppOpen() {
 		}
 		else if (ext == "tif" || ext == "tiff")
 		{
-			const char* filePath = CT2A(opnFileDlg.GetPathName());
-			TIFF* tiff = TIFFOpen(filePath, "r");
+			CStringA filePath(opnFileDlg.GetPathName());
+			TIFF* tiff = TIFFOpen((const char*)filePath, "r");
 			printf("%d", TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH));
 		}
 		Invalidate();
