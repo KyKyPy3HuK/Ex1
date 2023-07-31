@@ -93,11 +93,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Pozer\Desktop\Foton\Ex1\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Pozer\Desktop\Foton\Ex1\libtiff;V:\Projects\Foton\Ex1\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
-      <AdditionalLibraryDirectories>C:\Users\Pozer\Desktop\Foton\Ex1\libtiff\LibD;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Pozer\Desktop\Foton\Ex1\libtiff\LibD;V:\Projects\Foton\Ex1\libtiff\LibD;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>tiffd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
