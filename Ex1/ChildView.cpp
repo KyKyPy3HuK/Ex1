@@ -7,6 +7,8 @@
 #include "ChildView.h"
 #include <string>
 #include <tiffio.h>
+#include <iostream>
+#include <stdarg.h>
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
@@ -296,6 +298,13 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 }
 
+void myTIFFErrorHandler(const char* module, const char* fmt, va_list ap)
+{
+	CHAR s[10000];
+	vsprintf_s(s, 9999, fmt, ap);
+	//AddLog(s);
+}
+
 void CChildView::OnAppOpen() {
 	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("BMP files (*.bmp)|*.bmp|TIFF files (*.tif)|*.tif|"),NULL, 0, 1);
 
@@ -307,11 +316,8 @@ void CChildView::OnAppOpen() {
 		}
 		isImageDrawed = false;
 		isFileOpen = true;
-
 		m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyRead);
-
 		CString ext = opnFileDlg.GetFileExt(); // Получение расширения файла
-
 		if ( ext == "bmp") //Если файл имеет расширение bmp
 		{
 		
@@ -347,9 +353,14 @@ void CChildView::OnAppOpen() {
 		}
 		else if (ext == "tif" || ext == "tiff")
 		{
-			CStringA filePath(opnFileDlg.GetPathName());
-			TIFF* tiff = TIFFOpen((const char*)filePath, "r");
-			printf("%d", TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH));
+			TIFFSetErrorHandler(myTIFFErrorHandler);
+			CString filePath(opnFileDlg.GetPathName());
+			CStringA filePathA(filePath);
+			TIFF* tif = TIFFOpen(filePathA, "r");
+			int width;
+			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+			TIFFClose(tif);
+			std::cout << width;
 		}
 		Invalidate();
 	}
