@@ -12,6 +12,7 @@
 #include <iostream>
 #include "stdio.h"
 #include "ChildView.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -59,6 +60,12 @@ CEx1App theApp;
 
 BOOL CEx1App::InitInstance()
 {
+
+	TIFF* tif = TIFFOpen("C:\\Users\\Pozer\\Desktop\\Foton\\Ex1\\Ex1\\kramer.tif", "r");
+	int width;
+	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+	TIFFClose(tif);
+	std::cout << width;
 	// InitCommonControlsEx() требуются для Windows XP, если манифест
 	// приложения использует ComCtl32.dll версии 6 или более поздней версии для включения
 	// стилей отображения.  В противном случае будет возникать сбой при создании любого окна.

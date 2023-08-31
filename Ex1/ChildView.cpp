@@ -6,7 +6,6 @@
 #include "Ex1.h"
 #include "ChildView.h"
 #include <string>
-#include <tiffio.h>
 #include <iostream>
 #include <stdarg.h>
 #define getBit(val,x) ((val >> x) & 0x1)
@@ -306,6 +305,7 @@ void myTIFFErrorHandler(const char* module, const char* fmt, va_list ap)
 }
 
 void CChildView::OnAppOpen() {
+
 	CFileDialog opnFileDlg(TRUE,NULL,NULL,NULL, _T("BMP files (*.bmp)|*.bmp|TIFF files (*.tif)|*.tif|"),NULL, 0, 1);
 
 	if (opnFileDlg.DoModal() == IDOK)
@@ -315,50 +315,51 @@ void CChildView::OnAppOpen() {
 			m_pictureFile->Close();
 		}
 		isImageDrawed = false;
-		isFileOpen = true;
-		m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyRead);
+
 		CString ext = opnFileDlg.GetFileExt(); // Получение расширения файла
 		if ( ext == "bmp") //Если файл имеет расширение bmp
 		{
+			isFileOpen = true;
+			m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyNone);
+			m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
+			m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+
+			uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
+			bool isPalletBmp = false;
+			if (bmInfo.biBitCount <= 8)
+			{
+				m_pallet = new RGBQUAD[bmInfo.biClrUsed];
+				m_pictureFile->Read(m_pallet, sizeof(RGBQUAD) * bmInfo.biClrUsed);
+				isPalletBmp = true;  
+			}
 		
-		m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
-		m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
+			m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
 
-		uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
-		bool isPalletBmp = false;
-		if (bmInfo.biBitCount <= 8)
-		{
-			m_pallet = new RGBQUAD[bmInfo.biClrUsed];
-			m_pictureFile->Read(m_pallet, sizeof(RGBQUAD) * bmInfo.biClrUsed);
-			isPalletBmp = true;  
-		}
+			CDC dc;
+			dc.CreateCompatibleDC(this->GetDC());
+
+			m_bitmapInfo.bmiHeader = bmInfo;
+
+			if (isPalletBmp)
+			{
+				inputBitmap = palletToNormalBitmap(m_bitmapInfo, m_pallet, inputBitmap);
+			}
 		
-		m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
-
-		CDC dc;
-		dc.CreateCompatibleDC(this->GetDC());
-
-		m_bitmapInfo.bmiHeader = bmInfo;
-
-		if (isPalletBmp)
-		{
-			inputBitmap = palletToNormalBitmap(m_bitmapInfo, m_pallet, inputBitmap);
-		}
-		
-		m_DIBSectionBitmap = new uint8_t[m_bitmapInfo.bmiHeader.biSizeImage];
-		m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
+			m_DIBSectionBitmap = new uint8_t[m_bitmapInfo.bmiHeader.biSizeImage];
+			m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
 			(void**)&m_DIBSectionBitmap, NULL, 0);
-		memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
-		m_bitmap = inputBitmap;
+			memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
+			m_bitmap = inputBitmap;
 		}
 		else if (ext == "tif" || ext == "tiff")
 		{
-			TIFFSetErrorHandler(myTIFFErrorHandler);
 			CString filePath(opnFileDlg.GetPathName());
-			CStringA filePathA(filePath);
-			TIFF* tif = TIFFOpen(filePathA, "r");
+			TIFF* tif = TIFFOpenW(filePath, "r");
+			
 			int width;
 			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+
+			
 			TIFFClose(tif);
 			std::cout << width;
 		}

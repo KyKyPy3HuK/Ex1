@@ -9,5 +9,5 @@
 
 // Добавьте сюда заголовочные файлы для предварительной компиляции
 #include "framework.h"
-
+#include <tiffio.h>
 #endif //PCH_H
