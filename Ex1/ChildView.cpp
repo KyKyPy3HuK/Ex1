@@ -41,6 +41,18 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
 
+int CChildView::alignWidthInBytes(int imageWidth) {
+	uint32_t	alignBytes = (4 - (imageWidth % 4)) % 4;
+	uint32_t	fullWidthInBytes = imageWidth + alignBytes;
+	return fullWidthInBytes;
+}
+
+int CChildView::alignImageSizeInBytes(int imageWidth, int imageHeight) {
+
+	uint32_t fullWidthInBytes = alignWidthInBytes(imageWidth * 3);
+	return fullWidthInBytes * imageHeight;
+}
+
 uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap)
 {
 	uint8_t		clrUsed				= biInfo.bmiHeader.biClrUsed;
@@ -103,6 +115,41 @@ uint8_t* CChildView::palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, u
 
 	return n_bitmap;
 }
+
+uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
+	uint32_t imageLength = -1;
+	TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &imageLength);
+	uint32_t imageWidth = -1;
+	TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &imageWidth);
+	std::cout << imageLength << std::endl;
+	uint32_t lineSize = TIFFScanlineSize(tiff);
+
+
+	uint32_t fullWidthInBytes = alignWidthInBytes(lineSize);
+	uint32_t fullSizeInBytes = alignImageSizeInBytes(imageWidth, imageLength);
+
+	uint8_t* bitmap = new uint8_t[fullSizeInBytes]{ 0 };
+
+	std::cout << lineSize << "   " << fullWidthInBytes << "   " << imageWidth << " FSIB " << fullSizeInBytes;
+
+	uint8_t* buf = new uint8_t[lineSize]{ 0 };
+
+	for (int i = 0; i < imageLength; i++)
+	{
+		TIFFReadScanline(tiff, buf,i);
+
+		for (int j = 0; j < lineSize; j++)
+		{
+			bitmap[(fullSizeInBytes - fullWidthInBytes * (i + 1)) + j] = buf[j];
+		}
+	}
+
+	return bitmap;
+}
+
+
+
+
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
 	UINT widthInBytes = width * BYTES_PER_PIXEL;
@@ -310,22 +357,28 @@ void CChildView::OnAppOpen() {
 
 	if (opnFileDlg.DoModal() == IDOK)
 	{
-		if (isFileOpen)
-		{
-			m_pictureFile->Close();
-		}
+
 		isImageDrawed = false;
+
+		CDC dc;
+		dc.CreateCompatibleDC(this->GetDC());
 
 		CString ext = opnFileDlg.GetFileExt(); // Получение расширения файла
 		if ( ext == "bmp") //Если файл имеет расширение bmp
 		{
+			if (isFileOpen)
+			{
+				m_pictureFile->Close();
+			}
 			isFileOpen = true;
 			m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyNone);
 			m_pictureFile->Read(&bmHeader, sizeof(BITMAPFILEHEADER));
 			m_pictureFile->Read(&bmInfo, sizeof(BITMAPINFOHEADER));
 
 			uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
+
 			bool isPalletBmp = false;
+
 			if (bmInfo.biBitCount <= 8)
 			{
 				m_pallet = new RGBQUAD[bmInfo.biClrUsed];
@@ -334,9 +387,6 @@ void CChildView::OnAppOpen() {
 			}
 		
 			m_pictureFile->Read(inputBitmap, sizeof(uint8_t) * bmInfo.biSizeImage); //read File
-
-			CDC dc;
-			dc.CreateCompatibleDC(this->GetDC());
 
 			m_bitmapInfo.bmiHeader = bmInfo;
 
@@ -353,15 +403,36 @@ void CChildView::OnAppOpen() {
 		}
 		else if (ext == "tif" || ext == "tiff")
 		{
+			isFileOpen = true;
 			CString filePath(opnFileDlg.GetPathName());
-			TIFF* tif = TIFFOpenW(filePath, "r");
-			
-			int width;
-			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+			TIFF* tiff = TIFFOpenW(filePath, "r");
 
+			TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &bmInfo.biWidth);
+			TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &bmInfo.biHeight);
+			bmInfo.biSizeImage = alignImageSizeInBytes(bmInfo.biWidth, bmInfo.biHeight);
 			
-			TIFFClose(tif);
-			std::cout << width;
+			bmInfo.biSize = 40;
+			bmInfo.biClrUsed = 0;
+			bmInfo.biBitCount = 24;
+			bmInfo.biClrImportant = 0;
+			bmInfo.biCompression = 0;
+			bmInfo.biPlanes = 1;
+			bmInfo.biXPelsPerMeter = 0;
+			bmInfo.biYPelsPerMeter = 0;
+
+			m_bitmapInfo.bmiHeader = bmInfo;
+
+			uint8_t* inputBitmap = new uint8_t[bmInfo.biSizeImage];
+
+			inputBitmap = tiffToNormalBitmap(tiff);
+
+			m_DIBSectionBitmap = new uint8_t[m_bitmapInfo.bmiHeader.biSizeImage];
+			m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
+				(void**)&m_DIBSectionBitmap, NULL, 0);
+			memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
+			m_bitmap = inputBitmap;
+
+			TIFFClose(tiff);
 		}
 		Invalidate();
 	}

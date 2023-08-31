@@ -53,8 +53,10 @@ protected:
 
 // Реализация
 public:
-
+	int CChildView::alignWidthInBytes(int imageWidth);
+	int CChildView::alignImageSizeInBytes(int imageWidth, int imageHeight);
 	uint8_t* palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap);
+	uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff);
 
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	virtual ~CChildView();
