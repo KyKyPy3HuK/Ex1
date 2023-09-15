@@ -21,9 +21,6 @@ public:
 
 // Элементы
 public:
-	CButton btnDraw,
-			btnDrawBlt,
-			btnErase;
 	CScrollBar	m_scrBarV,
 				m_scrBarH;
 	int m_scrBarVPos,
@@ -69,6 +66,7 @@ protected:
 		CScrollBar* pScrollBar);
 	afx_msg void OnPaint();
 	afx_msg void OnAppOpen();
+	afx_msg void OnAppRotate();
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

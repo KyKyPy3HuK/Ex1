@@ -38,8 +38,11 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_VSCROLL()
 	ON_WM_HSCROLL()
 	ON_WM_ERASEBKGND()
+	ON_COMMAND(ID_APP_ROTATE, &OnAppRotate)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
+
+
 
 int CChildView::alignWidthInBytes(int imageWidth) {
 	uint32_t	alignBytes = (4 - (imageWidth % 4)) % 4;
@@ -146,10 +149,6 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 
 	return bitmap;
 }
-
-
-
-
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
 	UINT widthInBytes = width * BYTES_PER_PIXEL;
@@ -439,5 +438,11 @@ void CChildView::OnAppOpen() {
 	else {
 		AfxMessageBox(_T("Файл не выбран!"));
 	}
+	
+}
+
+void CChildView::OnAppRotate() {
+	CDialogEx rotateDialog(IDD_DIALOG_ROTATE);
+	rotateDialog.DoModal();
 	
 }
