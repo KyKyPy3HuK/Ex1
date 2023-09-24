@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <stdarg.h>
+#include "rotateDialolg.h"
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
@@ -40,7 +41,9 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_ERASEBKGND()
 	ON_COMMAND(ID_APP_ROTATE, &OnAppRotate)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
+	ON_BN_CLICKED(IDOK, &CChildView::OnBnClickedOk)
 END_MESSAGE_MAP()
+
 
 
 
@@ -367,7 +370,7 @@ void CChildView::OnAppOpen() {
 		{
 			if (isFileOpen)
 			{
-				m_pictureFile->Close();
+				
 			}
 			isFileOpen = true;
 			m_pictureFile->Open(opnFileDlg.GetPathName(), CFile::modeRead | CFile::shareDenyNone);
@@ -399,6 +402,7 @@ void CChildView::OnAppOpen() {
 			(void**)&m_DIBSectionBitmap, NULL, 0);
 			memcpy(m_DIBSectionBitmap, inputBitmap, m_bitmapInfo.bmiHeader.biSizeImage);
 			m_bitmap = inputBitmap;
+			m_pictureFile->Close();
 		}
 		else if (ext == "tif" || ext == "tiff")
 		{
@@ -441,8 +445,18 @@ void CChildView::OnAppOpen() {
 	
 }
 
+
 void CChildView::OnAppRotate() {
-	CDialogEx rotateDialog(IDD_DIALOG_ROTATE);
+	
 	rotateDialog.DoModal();
 	
+	std::cout << rotateDialog.rotateValue << std::endl;
+}
+
+
+
+void CChildView::OnBnClickedOk()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+	std::cout << "sss" << std::endl;
 }

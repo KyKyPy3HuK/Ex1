@@ -2,6 +2,7 @@
 // ChildView.h: интерфейс класса CChildView
 #pragma once
 // Окно CChildView
+#include "rotateDialolg.h"
 
 class CChildView : public CWnd
 {
@@ -21,6 +22,7 @@ public:
 
 // Элементы
 public:
+	RotateDialog rotateDialog;
 	CScrollBar	m_scrBarV,
 				m_scrBarH;
 	int m_scrBarVPos,
@@ -66,9 +68,13 @@ protected:
 		CScrollBar* pScrollBar);
 	afx_msg void OnPaint();
 	afx_msg void OnAppOpen();
-	afx_msg void OnAppRotate();
+	
+	
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnAppRotate();
+
+	afx_msg void OnBnClickedOk();
 };
 
