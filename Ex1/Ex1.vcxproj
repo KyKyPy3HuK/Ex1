@@ -186,6 +186,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Bitmap24.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="Ex1.h" />
     <ClInclude Include="framework.h" />
@@ -196,6 +197,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bitmap24.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="Ex1.cpp" />
     <ClCompile Include="MainFrm.cpp" />

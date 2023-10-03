@@ -7,7 +7,7 @@
 class RotateDialog : public CDialogEx
 {
 	DECLARE_DYNAMIC(RotateDialog)
-
+	int rotateValue;
 public:
 	RotateDialog(CWnd* pParent = nullptr);   // стандартный конструктор
 	virtual ~RotateDialog();
@@ -22,11 +22,9 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	int rotateValue;
-
+	inline int GetRotateValue() { return rotateValue; };
 
 	afx_msg void OnEnChangeEdit1();
 	afx_msg void OnPaint();
-	
 	afx_msg void OnBnClickedOk();
 };

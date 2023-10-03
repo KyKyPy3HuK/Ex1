@@ -41,7 +41,6 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_ERASEBKGND()
 	ON_COMMAND(ID_APP_ROTATE, &OnAppRotate)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
-	ON_BN_CLICKED(IDOK, &CChildView::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -151,6 +150,22 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 	}
 
 	return bitmap;
+}
+
+uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angle) {
+
+	uint32_t	width = biInfo.bmiHeader.biWidth;
+	uint32_t	height = biInfo.bmiHeader.biHeight;
+	uint32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
+	uint32_t	widthInBytes = sizeInBytes / height;
+	uint32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
+	uint32_t	fullWidthInBytes = widthInBytes + alignBytes;
+
+
+
+	uint8_t* newBitmap = new uint8_t[0];
+
+	return 0;
 }
 
 void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x, int y) {
@@ -445,18 +460,27 @@ void CChildView::OnAppOpen() {
 	
 }
 
-
 void CChildView::OnAppRotate() {
-	
-	rotateDialog.DoModal();
-	
-	std::cout << rotateDialog.rotateValue << std::endl;
-}
+	if (isFileOpen)
+	{
+		switch (rotateDialog.DoModal())
+		{
+		case IDOK: {
+			std::cout << "Ok" << std::endl;
+			break;
+		}
+		case IDCANCEL: {
+			std::cout << "Cancel" << std::endl;
+			break;
+		}
+		default:
+			break;
+		}
 
-
-
-void CChildView::OnBnClickedOk()
-{
-	// TODO: добавьте свой код обработчика уведомлений
-	std::cout << "sss" << std::endl;
+		std::cout << rotateDialog.GetRotateValue() << std::endl;
+	}
+	else
+	{
+		AfxMessageBox(L"Изображение не открыто!");
+	}
 }

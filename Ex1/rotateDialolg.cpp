@@ -26,7 +26,7 @@ void RotateDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT1, rotateValue);
-	DDV_MinMaxInt(pDX, rotateValue, 0, 9999);
+	DDV_MinMaxInt(pDX, rotateValue, 0, 359);
 }
 
 
