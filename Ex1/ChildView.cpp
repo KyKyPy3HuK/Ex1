@@ -9,6 +9,7 @@
 #include <iostream>
 #include <stdarg.h>
 #include "rotateDialolg.h"
+#include <math.h>
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
@@ -44,7 +45,16 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 END_MESSAGE_MAP()
 
 
+int CChildView::getPixelIndex(BITMAPINFO biInfo, int row, int column) {
+	uint32_t	width = biInfo.bmiHeader.biWidth;
+	uint32_t	height = biInfo.bmiHeader.biHeight;
+	uint32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
+	uint32_t	widthInBytes = sizeInBytes / height;
+	uint32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
+	uint32_t	fullWidthInBytes = widthInBytes + alignBytes;
 
+	return 0;
+};
 
 int CChildView::alignWidthInBytes(int imageWidth) {
 	uint32_t	alignBytes = (4 - (imageWidth % 4)) % 4;
@@ -152,6 +162,8 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 	return bitmap;
 }
 
+
+
 uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angle) {
 
 	uint32_t	width = biInfo.bmiHeader.biWidth;
@@ -161,9 +173,38 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	uint32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
 	uint32_t	fullWidthInBytes = widthInBytes + alignBytes;
 
+	uint32_t	nX; 
+	uint32_t	nY;
+	double		cosf = std::cos(angle);
+	double		sinf = std::sin(angle);
+	CDC dc;
 
+	BITMAPINFO newBiInfo;
+	newBiInfo.bmiHeader = {
+		40,		//biSize,
+		200,	//biWidth,
+		200,	//biHeight,
+		1,		//biPlanes,
+		24,		//biBitCount,
+		0,		//biCompression,
+		120000,	//biSizeImage,
+		0,		//biXPelsPerMeter,
+		0,		//biYPelsPerMeter,
+		0,		//biClrUsed,
+		0		//biClrImportant,
+	};
+	uint8_t* newBitmap = new uint8_t[120000]{0};
+	m_bitmapInfo = newBiInfo;
+	dc.CreateCompatibleDC(this->GetDC());
+	m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
+		(void**)&newBitmap, NULL, 0);
 
-	uint8_t* newBitmap = new uint8_t[0];
+	//for (int i = 0; i < sizeInBytes; i++)
+	//{
+	//	bitmap[i] = bitmap[i] + angle;
+	//}
+	
+	
 
 	return 0;
 }
@@ -429,14 +470,14 @@ void CChildView::OnAppOpen() {
 			TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &bmInfo.biHeight);
 			bmInfo.biSizeImage = alignImageSizeInBytes(bmInfo.biWidth, bmInfo.biHeight);
 			
-			bmInfo.biSize = 40;
-			bmInfo.biClrUsed = 0;
-			bmInfo.biBitCount = 24;
-			bmInfo.biClrImportant = 0;
-			bmInfo.biCompression = 0;
-			bmInfo.biPlanes = 1;
-			bmInfo.biXPelsPerMeter = 0;
-			bmInfo.biYPelsPerMeter = 0;
+			bmInfo.biSize =			40;
+			bmInfo.biClrUsed =		0 ;
+			bmInfo.biBitCount =		24;
+			bmInfo.biClrImportant = 0 ;
+			bmInfo.biCompression =	0 ;
+			bmInfo.biPlanes =		1 ;
+			bmInfo.biXPelsPerMeter= 0 ;
+			bmInfo.biYPelsPerMeter= 0 ;
 
 			m_bitmapInfo.bmiHeader = bmInfo;
 
@@ -466,7 +507,9 @@ void CChildView::OnAppRotate() {
 		switch (rotateDialog.DoModal())
 		{
 		case IDOK: {
-			std::cout << "Ok" << std::endl;
+			
+			rotateBitmap(m_bitmapInfo,m_DIBSectionBitmap,rotateDialog.GetRotateValue());
+			Invalidate();
 			break;
 		}
 		case IDCANCEL: {
@@ -483,4 +526,5 @@ void CChildView::OnAppRotate() {
 	{
 		AfxMessageBox(L"Изображение не открыто!");
 	}
+	
 }

@@ -3,6 +3,8 @@
 
 RGBTRIPLE** Bitmap24::SetPixelMap()
 {	
+
+	// Инициализация памяти для массива пикселей
 	RGBTRIPLE** newPixelMap = new RGBTRIPLE * [this->widthPix];
 	for (int i = 0; i < this->widthPix; i++)
 	{

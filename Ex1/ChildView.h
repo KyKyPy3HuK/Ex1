@@ -30,9 +30,9 @@ public:
 // Переменные
 protected:
 
-	CFile* m_pictureFile;
+	CFile* m_pictureFile; //открытый файл
 
-	BITMAPFILEHEADER bmHeader;
+	BITMAPFILEHEADER bmHeader; 
 	BITMAPINFOHEADER bmInfo;
 
 	uint8_t* m_bitmap;
@@ -59,6 +59,7 @@ public:
 	uint8_t* rotateBitmap(BITMAPINFO& bmInfo, uint8_t* bitmap,double angle);
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	virtual ~CChildView();
+	static int getPixelIndex(BITMAPINFO biInfo,int row, int column);
 
 	// Созданные функции схемы сообщений
 protected:
