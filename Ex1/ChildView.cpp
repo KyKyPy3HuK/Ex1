@@ -13,6 +13,7 @@
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
+#define M_PI       3.14159265358979323846
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -56,9 +57,9 @@ int CChildView::getPixelIndex(BITMAPINFO biInfo, int row, int column) {
 	return 0;
 };
 
-int CChildView::alignWidthInBytes(int imageWidth) {
-	uint32_t	alignBytes = (4 - (imageWidth % 4)) % 4;
-	uint32_t	fullWidthInBytes = imageWidth + alignBytes;
+int CChildView::alignWidthInBytes(int imageWidthInBytes) {
+	uint32_t	alignBytes = (4 - (imageWidthInBytes % 4)) % 4;
+	uint32_t	fullWidthInBytes = imageWidthInBytes + alignBytes;
 	return fullWidthInBytes;
 }
 
@@ -164,40 +165,133 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 
 
 
-uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angle) {
+uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angleDEG) {
 
-	uint32_t	width = biInfo.bmiHeader.biWidth;
-	uint32_t	height = biInfo.bmiHeader.biHeight;
-	uint32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
-	uint32_t	widthInBytes = sizeInBytes / height;
-	uint32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
-	uint32_t	fullWidthInBytes = widthInBytes + alignBytes;
+	int32_t	width = biInfo.bmiHeader.biWidth;
+	int32_t	height = biInfo.bmiHeader.biHeight;
+	int32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
+	int32_t	widthInBytes = sizeInBytes / height;
+	int32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
+	int32_t	fullWidthInBytes = widthInBytes + alignBytes;
 
-	uint32_t	nX; 
-	uint32_t	nY;
-	double		cosf = std::cos(angle);
-	double		sinf = std::sin(angle);
+	double angleRAD = (M_PI /180) * angleDEG;
+
+	int32_t	nX; 
+	int32_t	nY;
+	double		cosf = std::cos(angleRAD);
+	double		sinf = std::sin(angleRAD);
 	CDC dc;
+	
+	//начальные координаты углов
+	int32_t	XLeftTop = 0;
+	int32_t	YLeftTop = 0;
+
+	int32_t	XRightTop = width;
+	int32_t	YRightTop = 0;
+
+	int32_t	XLeftBottom = 0;
+	int32_t	YLeftBottom = height;
+
+	int32_t	XRightBottom = width;
+	int32_t	YRightBottom = height;
+
+	int32_t	XCorners[4] = { XLeftTop, XRightTop, XLeftBottom, XRightBottom };
+	int32_t	YCorners[4] = { YLeftTop, YRightTop, YLeftBottom, YRightBottom };
+
+	int32_t	maxY = 0, 
+				maxX = 0, 
+				minY = 0, 
+				minX = 0;
+
+	int32_t	newXCorners[4]{0};
+	int32_t	newYCorners[4]{0};
+
+	//Поиск новых координат углов
+	//X
+	for (int i = 0; i < 4; ++i) {
+		newXCorners[i] = XCorners[i] * cosf - YCorners[i] * sinf;
+		newYCorners[i] = XCorners[i] * sinf + YCorners[i] * cosf;
+	}
+
+	//find min max X
+	for (int i = 0; i < 4; ++i) {
+		if (newXCorners[i] < minX)
+		{
+			minX = newXCorners[i];
+		}
+		else if (newXCorners[i] > maxX)
+		{
+			maxX = newXCorners[i];
+		}
+	}
+
+	//find min max Y
+	for (int i = 0; i < 4; ++i) {
+		if (newYCorners[i] < minY)
+		{
+			minY = newYCorners[i];
+		}
+		else if (newYCorners[i] > maxY)
+		{
+			maxY = newYCorners[i];
+		}
+	}
+
+	int32_t newWidth = std::abs(minX - maxX);
+	int32_t newheight = std::abs(minY - maxY);
+
+	uint32_t newBiSizeImage = alignImageSizeInBytes(newWidth, newheight);
 
 	BITMAPINFO newBiInfo;
 	newBiInfo.bmiHeader = {
 		40,		//biSize,
-		200,	//biWidth,
-		200,	//biHeight,
+		newWidth,	//biWidth,
+		newheight,	//biHeight,
 		1,		//biPlanes,
 		24,		//biBitCount,
 		0,		//biCompression,
-		120000,	//biSizeImage,
+		newBiSizeImage,	//biSizeImage,
 		0,		//biXPelsPerMeter,
 		0,		//biYPelsPerMeter,
 		0,		//biClrUsed,
 		0		//biClrImportant,
 	};
-	uint8_t* newBitmap = new uint8_t[120000]{0};
+	uint8_t* newBitmap = new uint8_t[newBiSizeImage]{255};
+
+	int srcX = 0;
+	int srcY = 0;
+	for (int i = 0; i < newheight; ++i)
+	{
+		for (int j = 0; j < newWidth; ++j)
+		{
+			uint32_t column = j;
+			uint32_t row = newheight - i;
+			uint32_t k = (newWidth * i + j * 3);
+
+			srcX = i * cosf - j * sinf;
+			srcY = i * sinf + j * cosf;
+
+			if (srcX < width && srcY < height)
+			{
+				// SetPixelFromNewBitmap[col,row]  = GetPixelFromOldBitmap[srcX,srcY];
+			}
+
+			dc.SetPixel(column, row, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
+		}
+	}
+
+
 	m_bitmapInfo = newBiInfo;
+
 	dc.CreateCompatibleDC(this->GetDC());
-	m_HBitmap = CreateDIBSection(dc, &m_bitmapInfo, DIB_RGB_COLORS,
-		(void**)&newBitmap, NULL, 0);
+	m_DIBSectionBitmap = new uint8_t[newBiSizeImage];
+	m_HBitmap = CreateDIBSection(dc, &newBiInfo, DIB_RGB_COLORS,
+		(void**)&m_DIBSectionBitmap, NULL, 0);
+	memcpy(m_DIBSectionBitmap, newBitmap, newBiSizeImage);
+
+
+
+
 
 	//for (int i = 0; i < sizeInBytes; i++)
 	//{
