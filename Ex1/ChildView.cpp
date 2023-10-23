@@ -10,9 +10,11 @@
 #include <stdarg.h>
 #include "rotateDialolg.h"
 #include <math.h>
+
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
+
 #define M_PI       3.14159265358979323846
 
 #ifdef _DEBUG
@@ -256,7 +258,7 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 		0,		//biClrUsed,
 		0		//biClrImportant,
 	};
-	uint8_t* newBitmap = new uint8_t[newBiSizeImage]{255};
+	uint8_t* newBitmap = new uint8_t[newBiSizeImage]{0};
 
 	int srcX = 0;
 	int srcY = 0;
@@ -276,7 +278,7 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 				// SetPixelFromNewBitmap[col,row]  = GetPixelFromOldBitmap[srcX,srcY];
 			}
 
-			dc.SetPixel(column, row, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
+			//dc.SetPixel(column, row, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
 		}
 	}
 
