@@ -56,7 +56,8 @@ public:
 	int CChildView::alignImageSizeInBytes(int imageWidth, int imageHeight);
 	uint8_t* palletToNormalBitmap(BITMAPINFO& biInfo, RGBQUAD* pallet, uint8_t* bitmap);
 	uint8_t* tiffToNormalBitmap(TIFF* tiff);
-	uint8_t* rotateBitmap(BITMAPINFO& bmInfo, uint8_t* bitmap,double angle);
+	uint8_t* rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap,double angle);
+	uint8_t* changeBitmap(BITMAPINFO& biInfo, uint8_t* bitmap);
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	virtual ~CChildView();
 	static int getPixelIndex(BITMAPINFO biInfo,int row, int column);
@@ -75,5 +76,6 @@ protected:
 public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnAppRotate();
+	afx_msg void OnAppChange();
 };
 

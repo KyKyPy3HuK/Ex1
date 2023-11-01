@@ -5,49 +5,49 @@ class Bitmap24
 	// fields
 private:
 
-	uint8_t* bitmap;
-	BITMAPINFOHEADER biInfo;
-	RGBTRIPLE** pixelMap;
-	int sizeByt;
-	int sizePix;
-	int widthPix;
-	int heigth;
-	int widthByt;
-	int fullWidthByt;
-	int offsetByt;
+	uint8_t* bitmap_;
+	BITMAPINFOHEADER biInfo_;
+	RGBTRIPLE** pixelMap_;
+	int sizeByt_;
+	int sizePix_;
+	int widthPix_;
+	int heigth_;
+	int widthByt_;
+	int fullWidthByt_;
+	int offsetByt_;
 
 	// constructors
 public:
 	Bitmap24() {
-		this->bitmap = nullptr;
+		bitmap_ = nullptr;
 
-		this->sizeByt = 0;
+		sizeByt_ = 0;
 
-		this->widthPix = 0;
-		this->heigth = 0;
-		this->sizePix = 0;
-		this->fullWidthByt = 0;
-		this->widthByt = 0;
-		this->offsetByt = 0;
+		widthPix_ = 0;
+		heigth_ = 0;
+		sizePix_ = 0;
+		fullWidthByt_ = 0;
+		widthByt_ = 0;
+		offsetByt_ = 0;
 
-		this->pixelMap = nullptr;
+		pixelMap_ = nullptr;
 	}
 
 	Bitmap24(BITMAPINFOHEADER& biInfo, uint8_t* bitmap) {
-		this-> bitmap = bitmap;
-		this-> biInfo = biInfo;
+		bitmap_ = bitmap;
+		biInfo_ = biInfo;
 		
-		this-> sizeByt = biInfo.biSize;
+		sizeByt_ = biInfo.biSize;
 		
-		this-> widthPix = biInfo.biWidth;
-		this-> heigth = biInfo.biHeight;
-		this-> sizePix = biInfo.biWidth * biInfo.biHeight;
-		this-> fullWidthByt = biInfo.biSize / biInfo.biHeight;
-		this-> widthByt = biInfo.biWidth * 3;
-		this-> offsetByt = fullWidthByt - widthByt;
+		widthPix_ = biInfo.biWidth;
+		heigth_ = biInfo.biHeight;
+		sizePix_ = biInfo.biWidth * biInfo.biHeight;
+		fullWidthByt_ = biInfo.biSizeImage / biInfo.biHeight;
+		widthByt_ = biInfo.biWidth * 3;
+		offsetByt_ = fullWidthByt_ - widthByt_;
 
 
-		this-> pixelMap = SetPixelMap();
+		pixelMap_ = SetPixelMap();
 	}
 
 	// methods
@@ -57,9 +57,9 @@ private:
 
 public:
 	inline RGBTRIPLE GetPixel(int coordX, int coordY) {
-		if (coordX < widthPix && coordX > -1 && coordY > -1 && coordY < heigth)
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
 		{
-			return this->pixelMap[coordX][coordY];
+			return pixelMap_[coordX][coordY];
 		}
 		else {
 			return RGBTRIPLE{ 0,0,0 };
@@ -67,10 +67,10 @@ public:
 	};
 
 	inline RGBTRIPLE SetPixel(int coordX, int coordY, RGBTRIPLE color) {
-		if (coordX < widthPix && coordX > -1 && coordY > -1 && coordY < heigth)
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
 		{
-			RGBTRIPLE temp = this->pixelMap[coordX][coordY];
-			this->pixelMap[coordX][coordY] = color;
+			RGBTRIPLE temp = pixelMap_[coordX][coordY];
+			pixelMap_[coordX][coordY] = color;
 			return temp;
 		}
 		else {

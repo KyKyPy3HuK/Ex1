@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include "rotateDialolg.h"
 #include <math.h>
-
+#include "Bitmap24.h"
 #define getBit(val,x) ((val >> x) & 0x1)
 #define setBit(val,x) (val |= (1 << x))
 #define clrBit(val,x) (val &= ~(1 << x))
@@ -44,6 +44,7 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_WM_HSCROLL()
 	ON_WM_ERASEBKGND()
 	ON_COMMAND(ID_APP_ROTATE, &OnAppRotate)
+	ON_COMMAND(ID_APP_CHANGE, &OnAppChange)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
 
@@ -165,9 +166,9 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 	return bitmap;
 }
 
-
-
 uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angleDEG) {
+
+	
 
 	int32_t	width = biInfo.bmiHeader.biWidth;
 	int32_t	height = biInfo.bmiHeader.biHeight;
@@ -282,7 +283,6 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 		}
 	}
 
-
 	m_bitmapInfo = newBiInfo;
 
 	dc.CreateCompatibleDC(this->GetDC());
@@ -319,6 +319,37 @@ void CChildView::drawPicture(CDC& dc, BYTE* bitmap, int width, int heigth, int x
 			dc.SetPixel(column + x, row + y, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
 		}
 	}
+}
+
+uint8_t* CChildView::changeBitmap(BITMAPINFO& biInfo, uint8_t* bitmap)
+{
+
+	int32_t	width = biInfo.bmiHeader.biWidth;
+	int32_t	height = biInfo.bmiHeader.biHeight;
+	int32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
+	int32_t	widthInBytes = sizeInBytes / height;
+	int32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
+	int32_t	fullWidthInBytes = widthInBytes + alignBytes;
+	CDC dc;
+
+
+
+	Bitmap24 pixelMap(biInfo.bmiHeader, bitmap);
+	for (int y = 0; y < 50; y++)
+	{
+		for (int x = 0; x < 50; x++)
+		{
+			pixelMap.SetPixel(x, y, RGBTRIPLE{ 255, 255, 255 });
+		}
+	}
+	uint8_t* newBitmap = pixelMap.GetBitmap();
+	dc.CreateCompatibleDC(this->GetDC());
+	m_DIBSectionBitmap = new uint8_t[sizeInBytes];
+	m_HBitmap = CreateDIBSection(dc, &biInfo, DIB_RGB_COLORS,
+		(void**)&m_DIBSectionBitmap, NULL, 0);
+	memcpy(m_DIBSectionBitmap, newBitmap, sizeInBytes);
+
+	return 0;
 }
 // Обработчики сообщений CChildView
 
@@ -595,6 +626,11 @@ void CChildView::OnAppOpen() {
 		AfxMessageBox(_T("Файл не выбран!"));
 	}
 	
+}
+
+void CChildView::OnAppChange() {
+	changeBitmap(m_bitmapInfo, m_DIBSectionBitmap);
+	Invalidate();
 }
 
 void CChildView::OnAppRotate() {
