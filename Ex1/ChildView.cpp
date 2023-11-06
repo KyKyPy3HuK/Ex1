@@ -261,27 +261,31 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	};
 	uint8_t* newBitmap = new uint8_t[newBiSizeImage]{0};
 
+
+
+
+	Bitmap24 oldPixelmap(biInfo.bmiHeader, bitmap);
+	Bitmap24 newPixelmap(newBiInfo.bmiHeader, newBitmap);
+
 	int srcX = 0;
 	int srcY = 0;
-	for (int i = 0; i < newheight; ++i)
+	for (int y = 0; y < newheight; ++y)
 	{
-		for (int j = 0; j < newWidth; ++j)
+		for (int x = 0; x < newWidth; ++x)
 		{
-			uint32_t column = j;
-			uint32_t row = newheight - i;
-			uint32_t k = (newWidth * i + j * 3);
-
-			srcX = i * cosf - j * sinf;
-			srcY = i * sinf + j * cosf;
+			
+			srcX = x * cosf - y * sinf;
+			srcY = x * sinf + y * cosf;
 
 			if (srcX < width && srcY < height)
 			{
-				// SetPixelFromNewBitmap[col,row]  = GetPixelFromOldBitmap[srcX,srcY];
+				newPixelmap.SetPixel(x,y, oldPixelmap.GetPixel(srcX, srcY));
 			}
 
-			//dc.SetPixel(column, row, RGB(bitmap[k + 2], bitmap[k + 1], bitmap[k]));
 		}
 	}
+
+	newBitmap = newPixelmap.GetBitmap();
 
 	m_bitmapInfo = newBiInfo;
 
@@ -335,7 +339,7 @@ uint8_t* CChildView::changeBitmap(BITMAPINFO& biInfo, uint8_t* bitmap)
 
 
 	Bitmap24 pixelMap(biInfo.bmiHeader, bitmap);
-	for (int y = 0; y < 50; y++)
+	for (int y = 0; y < 500; y++)
 	{
 		for (int x = 0; x < 50; x++)
 		{
