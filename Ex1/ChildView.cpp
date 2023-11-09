@@ -241,15 +241,15 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	}
 
 	int32_t newWidth = std::abs(minX - maxX);
-	int32_t newheight = std::abs(minY - maxY);
+	int32_t newHeight = std::abs(minY - maxY);
 
-	uint32_t newBiSizeImage = alignImageSizeInBytes(newWidth, newheight);
+	uint32_t newBiSizeImage = alignImageSizeInBytes(newWidth, newHeight);
 
 	BITMAPINFO newBiInfo;
 	newBiInfo.bmiHeader = {
 		40,		//biSize,
 		newWidth,	//biWidth,
-		newheight,	//biHeight,
+		newHeight,	//biHeight,
 		1,		//biPlanes,
 		24,		//biBitCount,
 		0,		//biCompression,
@@ -269,18 +269,21 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 
 	int srcX = 0;
 	int srcY = 0;
-	for (int y = 0; y < newheight; ++y)
+
+	int halfNewWidth = newWidth / 2;
+	int halfNewHeigth = newHeight / 2;
+
+	for (int y = 0; y < newHeight; ++y)
 	{
 		for (int x = 0; x < newWidth; ++x)
 		{
 			
-			srcX = x * cosf - y * sinf;
-			srcY = x * sinf + y * cosf;
+			srcX = (((x - halfNewWidth) * cosf) - ((y - halfNewHeigth) * sinf)) + (width / 2);
+			srcY = (((x - halfNewWidth) * sinf) + ((y - halfNewHeigth) * cosf)) + (height /2 );
 
-			if (srcX < width && srcY < height)
-			{
+
 				newPixelmap.SetPixel(x,y, oldPixelmap.GetPixel(srcX, srcY));
-			}
+
 
 		}
 	}
