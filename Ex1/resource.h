@@ -18,6 +18,8 @@
 #define IDB_BITMAP_MOUSE                313
 #define IDD_DIALOG_ROTATE               314
 #define IDC_EDIT1                       1000
+#define IDC_CHECK1                      1003
+#define IDC_BILINCHECK                  1003
 #define ID_32773                        32773
 #define ID_                             32774
 #define ID_APP_OPEN                     32775
@@ -31,7 +33,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        316
 #define _APS_NEXT_COMMAND_VALUE         32779
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
 #endif

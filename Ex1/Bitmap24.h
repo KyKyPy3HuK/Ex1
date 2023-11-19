@@ -56,6 +56,31 @@ private:
 	uint8_t* SetBitmapFromPixelMap();
 
 public:
+
+	static inline RGBTRIPLE rgbtAdd(RGBTRIPLE left, RGBTRIPLE right) {
+		RGBTRIPLE sum;
+		sum.rgbtBlue = left.rgbtBlue + right.rgbtBlue;
+		sum.rgbtGreen = left.rgbtGreen + right.rgbtGreen;
+		sum.rgbtRed = left.rgbtRed + right.rgbtRed;
+		return sum;
+	}
+
+	static inline RGBTRIPLE rgbtSub(RGBTRIPLE left, RGBTRIPLE right) {
+		RGBTRIPLE sub;
+		sub.rgbtBlue = left.rgbtBlue - right.rgbtBlue;
+		sub.rgbtGreen = left.rgbtGreen - right.rgbtGreen;
+		sub.rgbtRed = left.rgbtRed - right.rgbtRed;
+		return sub;
+	}
+
+	static inline RGBTRIPLE rgbtMul(RGBTRIPLE rgbt, double coef) {
+		RGBTRIPLE mul;
+		mul.rgbtBlue = rgbt.rgbtBlue * coef;
+		mul.rgbtGreen = rgbt.rgbtGreen * coef;
+		mul.rgbtRed = rgbt.rgbtRed * coef;
+		return mul;
+	}
+
 	inline RGBTRIPLE GetPixel(int coordX, int coordY) {
 		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
 		{
@@ -78,6 +103,14 @@ public:
 		}
 	};
 	uint8_t* GetBitmap();
+
+	inline static RGBTRIPLE linearInterpolation(RGBTRIPLE left, RGBTRIPLE right, double x) {
+		RGBTRIPLE newRgbt{ 0,0,0 };
+
+		newRgbt = rgbtAdd(rgbtMul(left, (1. - x)), rgbtMul(right, x));
+
+		return newRgbt;
+	}
 
 	// static methods
 private:

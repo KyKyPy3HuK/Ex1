@@ -17,6 +17,9 @@
 
 #define M_PI       3.14159265358979323846
 
+#define NO_INTERPOLATION 0
+#define BILINEAR_INTERPOLATION 1
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -47,18 +50,6 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_APP_CHANGE, &OnAppChange)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
 END_MESSAGE_MAP()
-
-
-int CChildView::getPixelIndex(BITMAPINFO biInfo, int row, int column) {
-	uint32_t	width = biInfo.bmiHeader.biWidth;
-	uint32_t	height = biInfo.bmiHeader.biHeight;
-	uint32_t	sizeInBytes = biInfo.bmiHeader.biSizeImage;
-	uint32_t	widthInBytes = sizeInBytes / height;
-	uint32_t	alignBytes = (4 - (widthInBytes % 4)) % 4;
-	uint32_t	fullWidthInBytes = widthInBytes + alignBytes;
-
-	return 0;
-};
 
 int CChildView::alignWidthInBytes(int imageWidthInBytes) {
 	uint32_t	alignBytes = (4 - (imageWidthInBytes % 4)) % 4;
@@ -166,9 +157,9 @@ uint8_t* CChildView::tiffToNormalBitmap(TIFF* tiff) {
 	return bitmap;
 }
 
-uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angleDEG) {
 
-	
+
+uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double angleDEG, int mode) {
 
 	int32_t	width = biInfo.bmiHeader.biWidth;
 	int32_t	height = biInfo.bmiHeader.biHeight;
@@ -261,14 +252,17 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	};
 	uint8_t* newBitmap = new uint8_t[newBiSizeImage]{0};
 
-
-
-
 	Bitmap24 oldPixelmap(biInfo.bmiHeader, bitmap);
 	Bitmap24 newPixelmap(newBiInfo.bmiHeader, newBitmap);
 
-	int srcX = 0;
-	int srcY = 0;
+	double srcX = 0;
+	double srcY = 0;
+
+	double dX = 0;
+	double dY = 0;
+
+	double newX = 0;
+	double newY = 0;
 
 	int halfNewWidth = newWidth / 2;
 	int halfNewHeigth = newHeight / 2;
@@ -277,14 +271,31 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	{
 		for (int x = 0; x < newWidth; ++x)
 		{
-			
 			srcX = (((x - halfNewWidth) * cosf) - ((y - halfNewHeigth) * sinf)) + (width / 2);
 			srcY = (((x - halfNewWidth) * sinf) + ((y - halfNewHeigth) * cosf)) + (height /2 );
 
+			switch (mode)
+			{
+			case NO_INTERPOLATION: {
+				newPixelmap.SetPixel(x, y, oldPixelmap.GetPixel(srcX, srcY));
+				break;
+			}
+			case BILINEAR_INTERPOLATION: {
 
-				newPixelmap.SetPixel(x,y, oldPixelmap.GetPixel(srcX, srcY));
+				dX = modf(srcX, &newX);
+				dY = modf(srcY, &newY);
 
-
+				newPixelmap.SetPixel(x, y, Bitmap24::linearInterpolation( 
+					Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY), oldPixelmap.GetPixel(newX + 1, newY), dX), 
+					Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY + 1), oldPixelmap.GetPixel(newX + 1, newY + 1), dX), 
+					dY 
+				));
+				break;
+			}
+			default:
+				break;
+			}
+			
 		}
 	}
 
@@ -297,17 +308,6 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	m_HBitmap = CreateDIBSection(dc, &newBiInfo, DIB_RGB_COLORS,
 		(void**)&m_DIBSectionBitmap, NULL, 0);
 	memcpy(m_DIBSectionBitmap, newBitmap, newBiSizeImage);
-
-
-
-
-
-	//for (int i = 0; i < sizeInBytes; i++)
-	//{
-	//	bitmap[i] = bitmap[i] + angle;
-	//}
-	
-	
 
 	return 0;
 }
@@ -646,8 +646,8 @@ void CChildView::OnAppRotate() {
 		switch (rotateDialog.DoModal())
 		{
 		case IDOK: {
-			
-			rotateBitmap(m_bitmapInfo,m_DIBSectionBitmap,rotateDialog.GetRotateValue());
+			rotateBitmap(m_bitmapInfo, m_DIBSectionBitmap, rotateDialog.GetRotateValue(), rotateDialog.GetIsBillinearInterpolation());
+
 			Invalidate();
 			break;
 		}

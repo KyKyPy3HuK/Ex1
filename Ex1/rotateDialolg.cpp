@@ -14,6 +14,7 @@ IMPLEMENT_DYNAMIC(RotateDialog, CDialogEx)
 RotateDialog::RotateDialog(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_DIALOG_ROTATE, pParent)
 	, rotateValue(0)
+	, isBilinearInterpolation(0)
 {
 
 }
@@ -26,6 +27,7 @@ void RotateDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT1, rotateValue);
+	DDX_Check(pDX, IDC_BILINCHECK, isBilinearInterpolation);
 	DDV_MinMaxInt(pDX, rotateValue, 0, 359);
 }
 
@@ -34,6 +36,7 @@ BEGIN_MESSAGE_MAP(RotateDialog, CDialogEx)
 	ON_WM_PAINT()
 	ON_EN_CHANGE(IDC_EDIT1, &RotateDialog::OnEnChangeEdit1)
 	ON_BN_CLICKED(IDOK, &RotateDialog::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BILINCHECK, &RotateDialog::OnBnClickedBilincheck)
 END_MESSAGE_MAP()
 
 
@@ -60,5 +63,13 @@ void RotateDialog::OnBnClickedOk()
 {
 	// TODO: добавьте свой код обработчика уведомлений
 	std::cout << "ыыы" << std::endl;
+	std::cout << isBilinearInterpolation << std::endl;
 	CDialogEx::OnOK();
+}
+
+
+void RotateDialog::OnBnClickedBilincheck()
+{
+	
+	// TODO: добавьте свой код обработчика уведомлений
 }
