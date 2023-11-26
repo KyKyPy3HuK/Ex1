@@ -59,9 +59,39 @@ public:
 
 	static inline RGBTRIPLE rgbtAdd(RGBTRIPLE left, RGBTRIPLE right) {
 		RGBTRIPLE sum;
-		sum.rgbtBlue = left.rgbtBlue + right.rgbtBlue;
-		sum.rgbtGreen = left.rgbtGreen + right.rgbtGreen;
-		sum.rgbtRed = left.rgbtRed + right.rgbtRed;
+		int blue = left.rgbtBlue + right.rgbtBlue;
+		if (blue > 255)
+		{
+			sum.rgbtBlue = 255;
+		}
+		else
+		{
+			sum.rgbtBlue = blue;
+		}
+
+		int green = left.rgbtGreen + right.rgbtGreen;
+		if (green > 255)
+		{
+			sum.rgbtGreen = 255;
+		}
+		else
+		{
+			sum.rgbtGreen = green;
+		}
+
+		int red = left.rgbtRed + right.rgbtRed;
+		if (red > 255)
+		{
+			sum.rgbtRed = 255;
+		}
+		else
+		{
+			sum.rgbtRed = red;
+		}
+
+		//sum.rgbtBlue = left.rgbtBlue + right.rgbtBlue;
+		//sum.rgbtGreen = left.rgbtGreen + right.rgbtGreen;
+		//sum.rgbtRed = left.rgbtRed + right.rgbtRed;
 		return sum;
 	}
 
@@ -104,12 +134,20 @@ public:
 	};
 	uint8_t* GetBitmap();
 
+	inline bool tryGetPixel(int coordX, int coordY) {
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+
 	inline static RGBTRIPLE linearInterpolation(RGBTRIPLE left, RGBTRIPLE right, double x) {
-		RGBTRIPLE newRgbt{ 0,0,0 };
 
-		newRgbt = rgbtAdd(rgbtMul(left, (1. - x)), rgbtMul(right, x));
-
-		return newRgbt;
+		return rgbtAdd(rgbtMul(left, (1. - x)), rgbtMul(right, x));
 	}
 
 	// static methods

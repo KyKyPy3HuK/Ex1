@@ -284,12 +284,16 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 
 				dX = modf(srcX, &newX);
 				dY = modf(srcY, &newY);
-
-				newPixelmap.SetPixel(x, y, Bitmap24::linearInterpolation( 
-					Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY), oldPixelmap.GetPixel(newX + 1, newY), dX), 
-					Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY + 1), oldPixelmap.GetPixel(newX + 1, newY + 1), dX), 
-					dY 
-				));
+				
+				if (dX >0 && dY > 0)
+				{
+					newPixelmap.SetPixel(x, y, Bitmap24::linearInterpolation(
+						Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY), oldPixelmap.GetPixel(newX + 1, newY), dX),
+						Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY + 1), oldPixelmap.GetPixel(newX + 1, newY + 1), dX),
+						dY
+					));
+				}
+				
 				break;
 			}
 			default:
