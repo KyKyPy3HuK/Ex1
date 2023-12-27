@@ -11,7 +11,7 @@ private:
 	int sizeByt_;
 	int sizePix_;
 	int widthPix_;
-	int heigth_;
+	int height_;
 	int widthByt_;
 	int fullWidthByt_;
 	int offsetByt_;
@@ -24,7 +24,7 @@ public:
 		sizeByt_ = 0;
 
 		widthPix_ = 0;
-		heigth_ = 0;
+		height_ = 0;
 		sizePix_ = 0;
 		fullWidthByt_ = 0;
 		widthByt_ = 0;
@@ -40,7 +40,7 @@ public:
 		sizeByt_ = biInfo.biSize;
 		
 		widthPix_ = biInfo.biWidth;
-		heigth_ = biInfo.biHeight;
+		height_ = biInfo.biHeight;
 		sizePix_ = biInfo.biWidth * biInfo.biHeight;
 		fullWidthByt_ = biInfo.biSizeImage / biInfo.biHeight;
 		widthByt_ = biInfo.biWidth * 3;
@@ -57,6 +57,12 @@ private:
 
 public:
 
+	inline uint32_t getWidth() {
+		return widthPix_;
+	}
+	inline uint32_t getHeight() {
+		return height_;
+	}
 	static inline RGBTRIPLE rgbtAdd(RGBTRIPLE left, RGBTRIPLE right) {
 		RGBTRIPLE sum;
 		int blue = left.rgbtBlue + right.rgbtBlue;
@@ -97,9 +103,48 @@ public:
 
 	static inline RGBTRIPLE rgbtSub(RGBTRIPLE left, RGBTRIPLE right) {
 		RGBTRIPLE sub;
-		sub.rgbtBlue = left.rgbtBlue - right.rgbtBlue;
-		sub.rgbtGreen = left.rgbtGreen - right.rgbtGreen;
-		sub.rgbtRed = left.rgbtRed - right.rgbtRed;
+		int nB = left.rgbtBlue - right.rgbtBlue;
+		if (nB > 255)
+		{
+			sub.rgbtBlue = 255;
+		}
+		else if(nB < 0)
+		{
+			sub.rgbtBlue = 0;
+		}
+		else
+		{
+			sub.rgbtBlue = nB;
+		}
+		
+		int nG = left.rgbtGreen - right.rgbtGreen;
+		if (nG > 255)
+		{
+			sub.rgbtGreen = 255;
+		}
+		else if (nG < 0)
+		{
+			sub.rgbtGreen = 0;
+		}
+		else
+		{
+			sub.rgbtGreen = nG;
+		}
+
+		int nR = left.rgbtRed - right.rgbtRed;
+		if (nR > 255)
+		{
+			sub.rgbtRed = 255;
+		}
+		else if (nR < 0)
+		{
+			sub.rgbtRed = 0;
+		}
+		else
+		{
+			sub.rgbtRed = nR;
+		}
+
 		return sub;
 	}
 
@@ -108,11 +153,53 @@ public:
 		mul.rgbtBlue = rgbt.rgbtBlue * coef;
 		mul.rgbtGreen = rgbt.rgbtGreen * coef;
 		mul.rgbtRed = rgbt.rgbtRed * coef;
+
+		int nB = rgbt.rgbtBlue * coef;
+		if (nB > 255)
+		{
+			mul.rgbtBlue = 255;
+		}
+		else if (nB < 0)
+		{
+			mul.rgbtBlue = 0;
+		}
+		else
+		{
+			mul.rgbtBlue = nB;
+		}
+
+		int nG = rgbt.rgbtGreen * coef;
+		if (nG > 255)
+		{
+			mul.rgbtGreen = 255;
+		}
+		else if (nG < 0)
+		{
+			mul.rgbtGreen = 0;
+		}
+		else
+		{
+			mul.rgbtGreen = nG;
+		}
+
+		int nR = rgbt.rgbtRed * coef;
+		if (nR > 255)
+		{
+			mul.rgbtRed = 255;
+		}
+		else if (nR < 0)
+		{
+			mul.rgbtRed = 0;
+		}
+		else
+		{
+			mul.rgbtRed = nR;
+		}
 		return mul;
 	}
 
 	inline RGBTRIPLE GetPixel(int coordX, int coordY) {
-		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < height_)
 		{
 			return pixelMap_[coordX][coordY];
 		}
@@ -122,7 +209,7 @@ public:
 	};
 
 	inline RGBTRIPLE SetPixel(int coordX, int coordY, RGBTRIPLE color) {
-		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < height_)
 		{
 			RGBTRIPLE temp = pixelMap_[coordX][coordY];
 			pixelMap_[coordX][coordY] = color;
@@ -135,7 +222,7 @@ public:
 	uint8_t* GetBitmap();
 
 	inline bool tryGetPixel(int coordX, int coordY) {
-		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < heigth_)
+		if (coordX < widthPix_ && coordX > -1 && coordY > -1 && coordY < height_)
 		{
 			return true;
 		}

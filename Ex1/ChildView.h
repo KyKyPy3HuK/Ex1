@@ -3,6 +3,7 @@
 #pragma once
 // Окно CChildView
 #include "rotateDialolg.h"
+#include "ConvDialog.h"
 
 class CChildView : public CWnd
 {
@@ -23,6 +24,7 @@ public:
 // Элементы
 public:
 	RotateDialog rotateDialog;
+	ConvDialog convDialog;
 	CScrollBar	m_scrBarV,
 				m_scrBarH;
 	int m_scrBarVPos,
@@ -58,6 +60,7 @@ public:
 	uint8_t* tiffToNormalBitmap(TIFF* tiff);
 	uint8_t* rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap,double angle, int mode);
 	uint8_t* changeBitmap(BITMAPINFO& biInfo, uint8_t* bitmap);
+	uint8_t* CChildView::convBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double* covMatrix);
 	void drawPicture(CDC& dc, BYTE* bitMap, int width, int heigth, int x, int y);
 	virtual ~CChildView();
 	static int getPixelIndex(BITMAPINFO biInfo,int row, int column);
@@ -77,5 +80,6 @@ public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnAppRotate();
 	afx_msg void OnAppChange();
+	afx_msg void OnAppConv();
 };
 

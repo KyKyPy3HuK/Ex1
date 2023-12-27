@@ -94,6 +94,7 @@
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)libtiff/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="Bitmap24.h" />
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="ConvDialog.h" />
     <ClInclude Include="Ex1.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MainFrm.h" />
@@ -199,6 +201,7 @@
   <ItemGroup>
     <ClCompile Include="Bitmap24.cpp" />
     <ClCompile Include="ChildView.cpp" />
+    <ClCompile Include="ConvDialog.cpp" />
     <ClCompile Include="Ex1.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="pch.cpp">

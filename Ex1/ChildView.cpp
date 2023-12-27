@@ -29,6 +29,8 @@
 #define GREEN 1
 #define BLUE 0
 
+#define CONV_MATRIX_SIZE 9
+
 // CChildView
 
 CChildView::CChildView()
@@ -49,6 +51,7 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_APP_ROTATE, &OnAppRotate)
 	ON_COMMAND(ID_APP_CHANGE, &OnAppChange)
 	ON_COMMAND(ID_APP_OPEN, &OnAppOpen)
+	ON_COMMAND(ID_APP_CONV, &OnAppConv)
 END_MESSAGE_MAP()
 
 int CChildView::alignWidthInBytes(int imageWidthInBytes) {
@@ -254,6 +257,8 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 
 	Bitmap24 oldPixelmap(biInfo.bmiHeader, bitmap);
 	Bitmap24 newPixelmap(newBiInfo.bmiHeader, newBitmap);
+#pragma omp parallel
+	{
 
 	double srcX = 0;
 	double srcY = 0;
@@ -267,12 +272,14 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 	int halfNewWidth = newWidth / 2;
 	int halfNewHeigth = newHeight / 2;
 
+#pragma omp for
+
 	for (int y = 0; y < newHeight; ++y)
 	{
 		for (int x = 0; x < newWidth; ++x)
 		{
 			srcX = (((x - halfNewWidth) * cosf) - ((y - halfNewHeigth) * sinf)) + (width / 2);
-			srcY = (((x - halfNewWidth) * sinf) + ((y - halfNewHeigth) * cosf)) + (height /2 );
+			srcY = (((x - halfNewWidth) * sinf) + ((y - halfNewHeigth) * cosf)) + (height / 2);
 
 			switch (mode)
 			{
@@ -284,8 +291,8 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 
 				dX = modf(srcX, &newX);
 				dY = modf(srcY, &newY);
-				
-				if (dX >0 && dY > 0)
+
+				if (dX > 0 && dY > 0)
 				{
 					newPixelmap.SetPixel(x, y, Bitmap24::linearInterpolation(
 						Bitmap24::linearInterpolation(oldPixelmap.GetPixel(newX, newY), oldPixelmap.GetPixel(newX + 1, newY), dX),
@@ -293,26 +300,88 @@ uint8_t* CChildView::rotateBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double an
 						dY
 					));
 				}
-				
+
 				break;
 			}
 			default:
 				break;
 			}
-			
+
 		}
 	}
+	}
+	newBitmap = newPixelmap.GetBitmap(); 
 
-	newBitmap = newPixelmap.GetBitmap();
-
-	m_bitmapInfo = newBiInfo;
+	m_bitmapInfo = newBiInfo; 
 
 	dc.CreateCompatibleDC(this->GetDC());
-	m_DIBSectionBitmap = new uint8_t[newBiSizeImage];
+	m_DIBSectionBitmap = new uint8_t[newBiSizeImage]; 
 	m_HBitmap = CreateDIBSection(dc, &newBiInfo, DIB_RGB_COLORS,
 		(void**)&m_DIBSectionBitmap, NULL, 0);
 	memcpy(m_DIBSectionBitmap, newBitmap, newBiSizeImage);
 
+	return 0;
+}
+
+uint8_t* CChildView::convBitmap(BITMAPINFO& biInfo, uint8_t* bitmap, double* covMatrix) {
+
+	uint8_t* newBitmap = new uint8_t[biInfo.bmiHeader.biSizeImage]{ 0 };
+	Bitmap24 oldPixelMap(biInfo.bmiHeader, bitmap);
+	Bitmap24 newPixelMap(biInfo.bmiHeader, bitmap);
+
+	uint32_t heigth = newPixelMap.getHeight();
+	uint32_t width = newPixelMap.getWidth();
+
+	RGBTRIPLE newColor{ 0,0,0 };
+
+	int nR = 0;
+	int nG = 0;
+	int nB = 0;
+
+	RGBTRIPLE matrix[9];
+	for (int y = 0; y < heigth; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			nR = 0;
+			nG = 0;
+			nB = 0;
+
+			matrix[0] = oldPixelMap.GetPixel(x - 1, y - 1); matrix[1] = oldPixelMap.GetPixel(x, y - 1); matrix[2] = oldPixelMap.GetPixel(x + 1, y - 1);
+			matrix[3] = oldPixelMap.GetPixel(x - 1, y    ); matrix[4] = oldPixelMap.GetPixel(x, y    ); matrix[5] = oldPixelMap.GetPixel(x + 1, y    );
+			matrix[6] = oldPixelMap.GetPixel(x - 1, y + 1); matrix[7] = oldPixelMap.GetPixel(x, y + 1); matrix[8] = oldPixelMap.GetPixel(x + 1, y + 1);
+			for (int i = 0; i < 9; i++)
+			{
+
+					nR = nR + matrix[i].rgbtRed * covMatrix[i];
+					nG = nG + matrix[i].rgbtGreen * covMatrix[i];
+					nB = nB + matrix[i].rgbtBlue * covMatrix[i];
+
+			}
+
+			if (nB > 255) newColor.rgbtBlue = 255;
+			else if (nB < 0) newColor.rgbtBlue = 0;
+			else newColor.rgbtBlue = nB;
+			
+			if (nG > 255) newColor.rgbtGreen = 255;
+			else if (nG < 0) newColor.rgbtGreen = 0;
+			else newColor.rgbtGreen = nG;
+
+			if (nR > 255) newColor.rgbtRed = 255;
+			else if (nR < 0) newColor.rgbtRed = 0;
+			else newColor.rgbtRed = nR;
+
+			newPixelMap.SetPixel(x, y, newColor);
+		}
+	}
+
+	newBitmap = newPixelMap.GetBitmap();
+	CDC dc;
+	dc.CreateCompatibleDC(this->GetDC());
+	m_DIBSectionBitmap = new uint8_t[biInfo.bmiHeader.biSizeImage];
+	m_HBitmap = CreateDIBSection(dc, &biInfo, DIB_RGB_COLORS,
+		(void**)&m_DIBSectionBitmap, NULL, 0);
+	memcpy(m_DIBSectionBitmap, newBitmap, biInfo.bmiHeader.biSizeImage);
 	return 0;
 }
 
@@ -670,4 +739,36 @@ void CChildView::OnAppRotate() {
 		AfxMessageBox(L"Изображение не открыто!");
 	}
 	
+}
+
+
+void CChildView::OnAppConv() {
+	if (isFileOpen)
+	{
+		switch (convDialog.DoModal())
+		{
+		case IDOK: {
+			//convDialog.printVals();
+			double* convVals;
+			convVals = convDialog.getConvVals();
+			for (int i = 0; i < convDialog.convMatrixSize; i++)
+			{
+				std::cout << convVals[i] << std::endl;
+			}
+			convBitmap(m_bitmapInfo, m_DIBSectionBitmap, convDialog.getConvVals());
+			Invalidate();
+			break;
+		}
+		case IDCANCEL: {
+			std::cout << "Cancel" << std::endl;
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	else
+	{
+		AfxMessageBox(L"Изображение не открыто!");
+	}
 }
